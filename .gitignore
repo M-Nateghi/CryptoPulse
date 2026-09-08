@@ -1,0 +1,22 @@
+# Virtual environment
+.venv/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# Test and lint output
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local secrets
+.env
+teach/
+
+# Local data and databases
+data/
+*.db
+*.sqlite
+*.sqlite3
