@@ -32,3 +32,9 @@ class InsertSummary:
     received: int
     inserted: int
     skipped: int
+
+
+@dataclass(frozen=True)
+class ArticleForClassification:
+    id: int
+    title: str

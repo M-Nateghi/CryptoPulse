@@ -42,14 +42,68 @@ CREATE TABLE IF NOT EXISTS ingestion_runs (
     error_message TEXT
 );
 
+CREATE TABLE IF NOT EXISTS article_classifications (
+    id INTEGER PRIMARY KEY,
+    article_id INTEGER NOT NULL,
+    provider TEXT NOT NULL CHECK (provider <> ''),
+    model TEXT NOT NULL CHECK (model <> ''),
+    prompt_version TEXT NOT NULL CHECK (prompt_version <> ''),
+    input_text TEXT NOT NULL CHECK (input_text <> ''),
+    status TEXT NOT NULL CHECK (status IN ('succeeded', 'failed')),
+    is_relevant INTEGER CHECK (is_relevant IN (0, 1)),
+    processed_at TEXT NOT NULL,
+    error_message TEXT,
+    FOREIGN KEY (article_id) REFERENCES articles (id) ON DELETE CASCADE,
+    UNIQUE (article_id, provider, model, prompt_version),
+    CHECK (
+        (status = 'succeeded' AND is_relevant IS NOT NULL AND error_message IS NULL)
+        OR
+        (status = 'failed' AND is_relevant IS NULL AND error_message IS NOT NULL)
+    )
+);
+
+CREATE TABLE IF NOT EXISTS sentiment_results (
+    id INTEGER PRIMARY KEY,
+    classification_id INTEGER NOT NULL,
+    asset TEXT NOT NULL CHECK (asset IN ('BTC', 'ETH', 'SOL')),
+    sentiment TEXT NOT NULL CHECK (sentiment IN ('bullish', 'neutral', 'bearish')),
+    sentiment_score REAL NOT NULL CHECK (
+        sentiment_score >= -1 AND sentiment_score <= 1
+    ),
+    confidence REAL NOT NULL CHECK (confidence >= 0 AND confidence <= 1),
+    category TEXT NOT NULL CHECK (
+        category IN (
+            'etf_flows',
+            'institutional_adoption',
+            'regulation',
+            'technology',
+            'security_hacks',
+            'market_movement',
+            'macro',
+            'exchange_activity',
+            'other'
+        )
+    ),
+    reason TEXT NOT NULL CHECK (reason <> ''),
+    FOREIGN KEY (classification_id)
+        REFERENCES article_classifications (id) ON DELETE CASCADE,
+    UNIQUE (classification_id, asset)
+);
+
 CREATE INDEX IF NOT EXISTS idx_articles_published_at
 ON articles (published_at);
 
 CREATE INDEX IF NOT EXISTS idx_market_data_asset_timestamp
 ON market_data (asset, candle_timestamp);
+
+CREATE INDEX IF NOT EXISTS idx_article_classifications_status
+ON article_classifications (status);
+
+CREATE INDEX IF NOT EXISTS idx_sentiment_results_asset
+ON sentiment_results (asset);
 """
 
 
 def create_schema(connection: sqlite3.Connection) -> None:
-    """Create the Stage 1 database tables and indexes."""
+    """Create the current CryptoPulse database tables and indexes."""
     connection.executescript(SCHEMA_SQL)

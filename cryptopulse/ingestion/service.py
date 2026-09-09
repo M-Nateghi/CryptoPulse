@@ -93,15 +93,18 @@ def ingest_news(
     total = InsertSummary(received=0, inserted=0, skipped=0)
 
     try:
-        for asset in assets:
-            LOGGER.info("Starting GDELT ingestion for %s", asset)
-            articles = client.fetch_recent_articles(asset)
+        asset_list = tuple(assets)
+        if asset_list:
+            LOGGER.info("Starting combined GDELT ingestion for %s", ", ".join(asset_list))
+            articles = client.fetch_recent_articles_for_assets(
+                asset_list,
+                max_records=min(50 * len(asset_list), 250),
+            )
             summary = insert_articles(connection, articles)
             connection.commit()
             total = _combine_summaries(total, summary)
             LOGGER.info(
-                "GDELT %s: received=%d inserted=%d skipped=%d",
-                asset,
+                "GDELT combined query: received=%d inserted=%d skipped=%d",
                 summary.received,
                 summary.inserted,
                 summary.skipped,

@@ -6,7 +6,7 @@ from cryptopulse.db.database import open_database
 from cryptopulse.db.schema import create_schema
 
 
-def test_create_schema_creates_stage_one_tables_and_is_repeatable(tmp_path):
+def test_create_schema_creates_project_tables_and_is_repeatable(tmp_path):
     database_path = tmp_path / "test.db"
 
     with open_database(database_path) as connection:
@@ -22,7 +22,13 @@ def test_create_schema_creates_stage_one_tables_and_is_repeatable(tmp_path):
         ).fetchall()
 
     table_names = {row["name"] for row in table_rows}
-    assert table_names == {"articles", "ingestion_runs", "market_data"}
+    assert table_names == {
+        "article_classifications",
+        "articles",
+        "ingestion_runs",
+        "market_data",
+        "sentiment_results",
+    }
 
 
 def test_articles_reject_duplicate_source_url(tmp_path):

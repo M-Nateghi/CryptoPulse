@@ -4,21 +4,26 @@ CryptoPulse is a production-style cryptocurrency data project that will combine
 news sentiment with market activity for Bitcoin (BTC), Ethereum (ETH), and
 Solana (SOL).
 
-Stage 1 is complete. The project currently collects recent cryptocurrency news
-metadata from GDELT and hourly OHLCV market data from Binance, validates the
-responses, and stores them in SQLite without creating duplicate records.
+Stages 1 and 2 are complete. The project currently collects
+recent cryptocurrency news metadata from GDELT and hourly OHLCV market data from
+Binance, validates the responses, and stores them in SQLite without creating
+duplicate records. It can also classify stored articles into validated,
+asset-specific sentiment records with OpenAI Structured Outputs.
 
 ## Current Features
 
 - Public Binance ingestion for `BTCUSDT`, `ETHUSDT`, and `SOLUSDT`
 - Public GDELT news searches for BTC, ETH, and SOL
 - Typed configuration through Pydantic settings
-- SQLite tables for articles, market candles, and ingestion audit records
+- SQLite tables for articles, market candles, ingestion audits, and classifications
 - Idempotent inserts that safely skip previously stored data
 - UTC timestamps and structured application logging
 - Command-line interface for market, news, or combined ingestion
 - Mocked API tests that do not depend on live external services
-- 25 automated tests with 90% code coverage
+- Automated tests that run without live API dependencies
+- Strict Pydantic models for article relevance and asset-level sentiment
+- Provider-independent batch classification with failure tracking and safe retries
+- Real OpenAI classification plus a deterministic fake provider for offline testing
 
 ## Architecture
 
@@ -56,10 +61,17 @@ cryptopulse/
 |   |-- models.py           # Canonical data records
 |   |-- repositories.py     # Database reads and writes
 |   `-- schema.py           # Tables, constraints, and indexes
-`-- ingestion/
+|-- ingestion/
     |-- binance.py          # Binance market-data client
     |-- gdelt.py            # GDELT news client
-    `-- service.py          # Ingestion workflow coordination
+|   `-- service.py          # Ingestion workflow coordination
+`-- sentiment/
+    |-- cleaning.py         # Text normalization and asset candidates
+    |-- fake_provider.py    # Deterministic offline classifier
+    |-- models.py           # Structured sentiment output contract
+    |-- openai_provider.py  # Real OpenAI Structured Outputs adapter
+    |-- provider.py         # Provider-independent classifier interface
+    `-- service.py          # Bounded classification batch workflow
 
 tests/                      # Unit and integration tests
 requirements.txt            # Pinned Python dependencies
@@ -92,8 +104,21 @@ The project has been tested with Python 3.13 on Windows.
    python -m pip install -r requirements.txt
    ```
 
-No API keys are required for Stage 1 because it uses public market-data and
-news endpoints.
+No API keys are required for Stage 1 or for the offline test suite. Live OpenAI
+classification requires an API key. For one PowerShell session, set:
+
+```powershell
+$env:CRYPTOPULSE_OPENAI_API_KEY = "your-key-here"
+```
+
+Alternatively, store it in a local `.env` file:
+
+```dotenv
+CRYPTOPULSE_OPENAI_API_KEY=your-key-here
+CRYPTOPULSE_OPENAI_MODEL=gpt-5.6-luna
+```
+
+Never commit the `.env` file or paste the key into Python source code.
 
 ## Usage
 
@@ -115,11 +140,30 @@ Run both pipelines:
 python -m cryptopulse.cli ingest-all
 ```
 
+Exercise the complete classification workflow without API cost:
+
+```powershell
+python -m cryptopulse.cli classify-news --provider fake --limit 10
+```
+
+Run real OpenAI classification after configuring the API key:
+
+```powershell
+python -m cryptopulse.cli classify-news --provider openai --limit 10
+```
+
+The default provider is `openai`. The limit must be between 1 and 100 to keep
+each run bounded. Fake classifications are for development and testing only and
+must not be presented as analytical results.
+
 The database is created automatically at `data/cryptopulse.db`. Every run is
 recorded in the `ingestion_runs` table with its status and record counts.
 
-GDELT may occasionally return rate-limit or timeout errors. CryptoPulse reports
-these failures, records them in the audit table, and exits with a non-zero status.
+GDELT can be slower than the market-data endpoint and limits request frequency.
+CryptoPulse searches for all three assets in one combined request, uses a separate
+45-second timeout, spaces requests, and retries temporary rate-limit, server,
+timeout, and network failures with bounded backoff. Permanent failures are
+recorded in the audit table and return a non-zero status.
 
 ## Configuration
 
@@ -129,6 +173,9 @@ Settings can be overridden with environment variables using the
 ```powershell
 $env:CRYPTOPULSE_LOG_LEVEL = "DEBUG"
 $env:CRYPTOPULSE_REQUEST_TIMEOUT_SECONDS = "20"
+$env:CRYPTOPULSE_GDELT_REQUEST_TIMEOUT_SECONDS = "60"
+$env:CRYPTOPULSE_OPENAI_MODEL = "gpt-5.6-luna"
+$env:CRYPTOPULSE_OPENAI_TIMEOUT_SECONDS = "30"
 ```
 
 The same values may be placed in a local `.env` file, which is excluded from
@@ -150,7 +197,7 @@ test suite fast, repeatable, and independent of live API availability.
 | Stage | Goal | Status |
 |---|---|---|
 | 1 | Foundation, database, API clients, and ingestion | Complete |
-| 2 | Article cleaning and structured LLM sentiment | Planned |
+| 2 | Article cleaning and structured LLM sentiment | Complete |
 | 3 | VADER/FinBERT baselines and model evaluation | Planned |
 | 4 | Time-series analytics and Streamlit dashboard | Planned |
 | 5 | CI, deployment, and portfolio polish | Planned |

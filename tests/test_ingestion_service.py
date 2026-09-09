@@ -27,7 +27,7 @@ class StubBinanceClient:
 
 
 class StubGdeltClient:
-    def fetch_recent_articles(self, asset):
+    def fetch_recent_articles_for_assets(self, assets, max_records):
         return [
             Article(
                 source="gdelt",
@@ -38,12 +38,13 @@ class StubGdeltClient:
                 retrieved_at=datetime(2026, 9, 8, 11, tzinfo=UTC),
                 raw_query=asset,
             )
+            for asset in assets
         ]
 
 
 class FailingGdeltClient:
-    def fetch_recent_articles(self, asset):
-        raise RuntimeError(f"GDELT unavailable for {asset}")
+    def fetch_recent_articles_for_assets(self, assets, max_records):
+        raise RuntimeError(f"GDELT unavailable for {', '.join(assets)}")
 
 
 def test_market_ingestion_stores_candles_and_skips_them_on_repeat(tmp_path):
