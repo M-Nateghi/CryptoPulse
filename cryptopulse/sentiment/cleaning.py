@@ -11,6 +11,7 @@ ASSET_NAME_PATTERNS = {
     CryptoAsset.BTC: re.compile(r"\bbitcoin\b", re.IGNORECASE),
     CryptoAsset.ETH: re.compile(r"\b(?:ethereum|ether)\b", re.IGNORECASE),
     CryptoAsset.SOL: re.compile(r"\bsolana\b", re.IGNORECASE),
+    CryptoAsset.BNB: re.compile(r"\b(?:binance coin|bnb chain)\b", re.IGNORECASE),
 }
 
 ASSET_TICKER_PATTERNS = {

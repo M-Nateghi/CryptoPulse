@@ -9,6 +9,7 @@ SYMBOL_TO_ASSET = {
     "BTCUSDT": "BTC",
     "ETHUSDT": "ETH",
     "SOLUSDT": "SOL",
+    "BNBUSDT": "BNB",
 }
 
 

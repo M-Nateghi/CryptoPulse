@@ -7,6 +7,7 @@ class CryptoAsset(StrEnum):
     BTC = "BTC"
     ETH = "ETH"
     SOL = "SOL"
+    BNB = "BNB"
 
 
 class SentimentLabel(StrEnum):

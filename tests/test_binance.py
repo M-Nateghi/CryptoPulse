@@ -3,7 +3,11 @@ from datetime import UTC, datetime
 import httpx
 import pytest
 
-from cryptopulse.ingestion.binance import BinanceClient, parse_klines
+from cryptopulse.ingestion.binance import SYMBOL_TO_ASSET, BinanceClient, parse_klines
+
+
+def test_bnb_is_a_supported_market_symbol():
+    assert SYMBOL_TO_ASSET["BNBUSDT"] == "BNB"
 
 
 def test_binance_client_fetches_and_parses_hourly_candles():

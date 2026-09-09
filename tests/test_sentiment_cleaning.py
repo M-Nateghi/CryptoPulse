@@ -33,10 +33,15 @@ def test_clean_article_text_rejects_non_string_values():
 
 def test_candidate_assets_include_names_and_uppercase_tickers():
     candidates = find_candidate_assets(
-        "Bitcoin gains while ETH and $SOL react to the announcement"
+        "Bitcoin gains while ETH, $SOL, and Binance Coin react to the announcement"
     )
 
-    assert candidates == (CryptoAsset.BTC, CryptoAsset.ETH, CryptoAsset.SOL)
+    assert candidates == (
+        CryptoAsset.BTC,
+        CryptoAsset.ETH,
+        CryptoAsset.SOL,
+        CryptoAsset.BNB,
+    )
 
 
 def test_candidate_assets_are_unique_and_have_stable_order():
@@ -52,9 +57,17 @@ def test_candidate_assets_do_not_match_inside_larger_words():
 
 
 def test_lowercase_short_words_are_not_treated_as_tickers():
-    candidates = find_candidate_assets("A singer performs sol while using eth tools")
+    candidates = find_candidate_assets(
+        "A singer performs sol while using eth and bnb tools"
+    )
 
     assert candidates == ()
+
+
+def test_bnb_chain_name_is_detected_case_insensitively():
+    assert find_candidate_assets("Activity increases on bnb chain") == (
+        CryptoAsset.BNB,
+    )
 
 
 def test_prepare_article_text_returns_clean_text_and_candidates():

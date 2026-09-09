@@ -1,8 +1,8 @@
 # CryptoPulse
 
 CryptoPulse is a production-style cryptocurrency data project that will combine
-news sentiment with market activity for Bitcoin (BTC), Ethereum (ETH), and
-Solana (SOL).
+news sentiment with market activity for Bitcoin (BTC), Ethereum (ETH), Solana
+(SOL), and BNB.
 
 Stages 1 and 2 are complete. The project currently collects
 recent cryptocurrency news metadata from GDELT and hourly OHLCV market data from
@@ -12,8 +12,8 @@ asset-specific sentiment records with OpenAI Structured Outputs.
 
 ## Current Features
 
-- Public Binance ingestion for `BTCUSDT`, `ETHUSDT`, and `SOLUSDT`
-- Public GDELT news searches for BTC, ETH, and SOL
+- Public Binance ingestion for `BTCUSDT`, `ETHUSDT`, `SOLUSDT`, and `BNBUSDT`
+- Public GDELT news searches for BTC, ETH, SOL, and BNB
 - Typed configuration through Pydantic settings
 - SQLite tables for articles, market candles, ingestion audits, and classifications
 - Idempotent inserts that safely skip previously stored data

@@ -37,6 +37,17 @@ def test_valid_single_asset_classification_is_typed():
     assert asset_result.reason == "Strong BTC demand."
 
 
+def test_bnb_is_an_allowed_classification_asset():
+    result = ArticleClassification.model_validate(
+        {
+            "is_relevant": True,
+            "asset_sentiments": [_asset_sentiment(asset="BNB")],
+        }
+    )
+
+    assert result.asset_sentiments[0].asset is CryptoAsset.BNB
+
+
 def test_valid_multi_asset_classification_can_hold_different_sentiment():
     result = ArticleClassification.model_validate(
         {

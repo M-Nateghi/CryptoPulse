@@ -14,6 +14,7 @@ ASSET_QUERY_TERMS = {
     "BTC": ("Bitcoin", "BTC"),
     "ETH": ("Ethereum", "ETH"),
     "SOL": ("Solana", "SOL"),
+    "BNB": ('"BNB Chain"', '"Binance Coin"', "BNB"),
 }
 ASSET_QUERIES = {
     asset: f"({' OR '.join(terms)})"

@@ -124,13 +124,15 @@ def test_gdelt_client_combines_asset_terms_in_one_request():
         assert "Bitcoin" in query
         assert "Ethereum" in query
         assert "Solana" in query
+        assert '"BNB Chain"' in query
+        assert '"Binance Coin"' in query
         assert query.count("sourcelang:english") == 1
         return httpx.Response(200, json={"articles": []}, request=request)
 
     transport = httpx.MockTransport(handle_request)
     with httpx.Client(base_url="https://example.com", transport=transport) as http_client:
         articles = GdeltClient(http_client).fetch_recent_articles_for_assets(
-            ("BTC", "ETH", "SOL")
+            ("BTC", "ETH", "SOL", "BNB")
         )
 
     assert articles == []

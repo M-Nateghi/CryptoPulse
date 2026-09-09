@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS articles (
 
 CREATE TABLE IF NOT EXISTS market_data (
     id INTEGER PRIMARY KEY,
-    asset TEXT NOT NULL CHECK (asset IN ('BTC', 'ETH', 'SOL')),
+    asset TEXT NOT NULL CHECK (asset IN ('BTC', 'ETH', 'SOL', 'BNB')),
     symbol TEXT NOT NULL,
     candle_timestamp TEXT NOT NULL,
     open REAL NOT NULL CHECK (open >= 0),
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS article_classifications (
 CREATE TABLE IF NOT EXISTS sentiment_results (
     id INTEGER PRIMARY KEY,
     classification_id INTEGER NOT NULL,
-    asset TEXT NOT NULL CHECK (asset IN ('BTC', 'ETH', 'SOL')),
+    asset TEXT NOT NULL CHECK (asset IN ('BTC', 'ETH', 'SOL', 'BNB')),
     sentiment TEXT NOT NULL CHECK (sentiment IN ('bullish', 'neutral', 'bearish')),
     sentiment_score REAL NOT NULL CHECK (
         sentiment_score >= -1 AND sentiment_score <= 1
@@ -103,7 +103,86 @@ CREATE INDEX IF NOT EXISTS idx_sentiment_results_asset
 ON sentiment_results (asset);
 """
 
+BNB_ASSET_MIGRATION_SQL = """
+BEGIN IMMEDIATE;
+
+CREATE TABLE market_data_bnb (
+    id INTEGER PRIMARY KEY,
+    asset TEXT NOT NULL CHECK (asset IN ('BTC', 'ETH', 'SOL', 'BNB')),
+    symbol TEXT NOT NULL,
+    candle_timestamp TEXT NOT NULL,
+    open REAL NOT NULL CHECK (open >= 0),
+    high REAL NOT NULL CHECK (high >= 0),
+    low REAL NOT NULL CHECK (low >= 0),
+    close REAL NOT NULL CHECK (close >= 0),
+    volume REAL NOT NULL CHECK (volume >= 0),
+    quote_volume REAL NOT NULL CHECK (quote_volume >= 0),
+    trade_count INTEGER NOT NULL CHECK (trade_count >= 0),
+    CHECK (high >= low),
+    UNIQUE (symbol, candle_timestamp)
+);
+
+INSERT INTO market_data_bnb
+SELECT * FROM market_data;
+
+CREATE TABLE sentiment_results_bnb (
+    id INTEGER PRIMARY KEY,
+    classification_id INTEGER NOT NULL,
+    asset TEXT NOT NULL CHECK (asset IN ('BTC', 'ETH', 'SOL', 'BNB')),
+    sentiment TEXT NOT NULL CHECK (sentiment IN ('bullish', 'neutral', 'bearish')),
+    sentiment_score REAL NOT NULL CHECK (
+        sentiment_score >= -1 AND sentiment_score <= 1
+    ),
+    confidence REAL NOT NULL CHECK (confidence >= 0 AND confidence <= 1),
+    category TEXT NOT NULL CHECK (
+        category IN (
+            'etf_flows',
+            'institutional_adoption',
+            'regulation',
+            'technology',
+            'security_hacks',
+            'market_movement',
+            'macro',
+            'exchange_activity',
+            'other'
+        )
+    ),
+    reason TEXT NOT NULL CHECK (reason <> ''),
+    FOREIGN KEY (classification_id)
+        REFERENCES article_classifications (id) ON DELETE CASCADE,
+    UNIQUE (classification_id, asset)
+);
+
+INSERT INTO sentiment_results_bnb
+SELECT * FROM sentiment_results;
+
+DROP TABLE sentiment_results;
+DROP TABLE market_data;
+ALTER TABLE sentiment_results_bnb RENAME TO sentiment_results;
+ALTER TABLE market_data_bnb RENAME TO market_data;
+
+COMMIT;
+"""
+
+
+def _asset_tables_support_bnb(connection: sqlite3.Connection) -> bool:
+    for table_name in ("market_data", "sentiment_results"):
+        row = connection.execute(
+            "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = ?",
+            (table_name,),
+        ).fetchone()
+        if row is None or "'BNB'" not in row[0]:
+            return False
+    return True
+
 
 def create_schema(connection: sqlite3.Connection) -> None:
     """Create the current CryptoPulse database tables and indexes."""
     connection.executescript(SCHEMA_SQL)
+    if not _asset_tables_support_bnb(connection):
+        try:
+            connection.executescript(BNB_ASSET_MIGRATION_SQL)
+        except sqlite3.Error:
+            connection.rollback()
+            raise
+        connection.executescript(SCHEMA_SQL)
