@@ -47,7 +47,7 @@ class ArticleClassification(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     is_relevant: bool = Field(strict=True)
-    asset_sentiments: list[AssetSentiment] = Field(max_length=3)
+    asset_sentiments: list[AssetSentiment] = Field(max_length=4)
 
     @model_validator(mode="after")
     def validate_relevance_and_assets(self) -> "ArticleClassification":

@@ -86,6 +86,8 @@ def ingest_news(
     connection: sqlite3.Connection,
     client: GdeltClient,
     assets: Iterable[str] = tuple(ASSET_QUERIES),
+    max_records: int | None = None,
+    timespan: str = "1d",
 ) -> InsertSummary:
     """Fetch and store recent news for supported assets."""
     run_id = start_ingestion_run(connection, "gdelt", datetime.now(UTC))
@@ -98,7 +100,12 @@ def ingest_news(
             LOGGER.info("Starting combined GDELT ingestion for %s", ", ".join(asset_list))
             articles = client.fetch_recent_articles_for_assets(
                 asset_list,
-                max_records=min(50 * len(asset_list), 250),
+                max_records=(
+                    max_records
+                    if max_records is not None
+                    else min(50 * len(asset_list), 250)
+                ),
+                timespan=timespan,
             )
             summary = insert_articles(connection, articles)
             connection.commit()

@@ -71,6 +71,20 @@ def test_valid_multi_asset_classification_can_hold_different_sentiment():
     assert result.asset_sentiments[1].sentiment is SentimentLabel.BEARISH
 
 
+def test_classification_can_include_all_four_supported_assets():
+    result = ArticleClassification.model_validate(
+        {
+            "is_relevant": True,
+            "asset_sentiments": [
+                _asset_sentiment(asset=asset.value)
+                for asset in CryptoAsset
+            ],
+        }
+    )
+
+    assert [item.asset for item in result.asset_sentiments] == list(CryptoAsset)
+
+
 def test_irrelevant_article_has_an_explicit_empty_asset_list():
     result = ArticleClassification.model_validate(
         {"is_relevant": False, "asset_sentiments": []}

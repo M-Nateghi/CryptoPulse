@@ -152,6 +152,28 @@ Run real OpenAI classification after configuring the API key:
 python -m cryptopulse.cli classify-news --provider openai --limit 10
 ```
 
+Collect additional news for selected assets when preparing evaluation coverage:
+
+```powershell
+python -m cryptopulse.cli ingest-news --assets BNB --timespan 7d --max-records 100
+```
+
+Create the versioned human-labelling sheet after the database has sufficient
+coverage for every supported asset:
+
+```powershell
+python -m cryptopulse.cli prepare-evaluation --size 100 --seed 42
+```
+
+Follow `evaluation/LABELING_GUIDE.md` when completing
+`evaluation/labels_v1.csv`. The command refuses to overwrite an existing sheet.
+
+Validate the completed human labels before running any model evaluation:
+
+```powershell
+python -m cryptopulse.cli validate-evaluation
+```
+
 The default provider is `openai`. The limit must be between 1 and 100 to keep
 each run bounded. Fake classifications are for development and testing only and
 must not be presented as analytical results.
@@ -160,7 +182,7 @@ The database is created automatically at `data/cryptopulse.db`. Every run is
 recorded in the `ingestion_runs` table with its status and record counts.
 
 GDELT can be slower than the market-data endpoint and limits request frequency.
-CryptoPulse searches for all three assets in one combined request, uses a separate
+CryptoPulse searches for all four assets in one combined request, uses a separate
 45-second timeout, spaces requests, and retries temporary rate-limit, server,
 timeout, and network failures with bounded backoff. Permanent failures are
 recorded in the audit table and return a non-zero status.
@@ -198,7 +220,7 @@ test suite fast, repeatable, and independent of live API availability.
 |---|---|---|
 | 1 | Foundation, database, API clients, and ingestion | Complete |
 | 2 | Article cleaning and structured LLM sentiment | Complete |
-| 3 | VADER/FinBERT baselines and model evaluation | Planned |
+| 3 | Human-labelled evaluation set and model comparison | In progress |
 | 4 | Time-series analytics and Streamlit dashboard | Planned |
 | 5 | CI, deployment, and portfolio polish | Planned |
 
