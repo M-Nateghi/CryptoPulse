@@ -4,11 +4,12 @@ CryptoPulse is a production-style cryptocurrency data project that will combine
 news sentiment with market activity for Bitcoin (BTC), Ethereum (ETH), Solana
 (SOL), and BNB.
 
-Stages 1 and 2 are complete. The project currently collects
+Stages 1, 2, and 4 are complete. The project currently collects
 recent cryptocurrency news metadata from GDELT and hourly OHLCV market data from
 Binance, validates the responses, and stores them in SQLite without creating
 duplicate records. It can also classify stored articles into validated,
-asset-specific sentiment records with OpenAI Structured Outputs.
+asset-specific sentiment records with OpenAI Structured Outputs, calculate
+time-series features, and present them in an interactive Streamlit dashboard.
 
 ## Current Features
 
@@ -24,6 +25,9 @@ asset-specific sentiment records with OpenAI Structured Outputs.
 - Strict Pydantic models for article relevance and asset-level sentiment
 - Provider-independent batch classification with failure tracking and safe retries
 - Real OpenAI classification plus a deterministic fake provider for offline testing
+- Per-asset returns, rolling volatility, volume movement, and daily sentiment metrics
+- Streamlit dashboard with asset, date, sentiment, and news-category filters
+- Interactive sentiment, category-driver, story, price, and volatility views
 
 ## Architecture
 
@@ -53,6 +57,9 @@ orchestration can be tested and changed independently.
 
 ```text
 cryptopulse/
+|-- analytics/
+|   |-- features.py         # Time-series features and aggregations
+|   `-- queries.py          # Dashboard database queries
 |-- cli.py                  # Command-line entry point
 |-- config.py               # Environment-based settings
 |-- logging_config.py       # Application logging
@@ -74,6 +81,7 @@ cryptopulse/
     `-- service.py          # Bounded classification batch workflow
 
 tests/                      # Unit and integration tests
+streamlit_app.py            # Interactive analytics dashboard
 requirements.txt            # Pinned Python dependencies
 ```
 
@@ -174,6 +182,34 @@ Validate the completed human labels before running any model evaluation:
 python -m cryptopulse.cli validate-evaluation
 ```
 
+Start the local analytics dashboard:
+
+```powershell
+python -m streamlit run streamlit_app.py
+```
+
+The dashboard reads the same `data/cryptopulse.db` database as the CLI. Market
+views work as soon as candles exist; sentiment views remain explicitly empty
+until relevant OpenAI classifications have been stored.
+
+### Analytics formulas
+
+The dashboard preserves the model's `-1` to `+1` sentiment score and calculates
+a daily confidence-weighted mean for each asset:
+
+```text
+weighted sentiment = sum(sentiment score * confidence) / sum(confidence)
+display score       = (weighted sentiment + 1) * 50
+```
+
+The display score therefore runs from 0 to 100, with 50 as neutral. Every score
+is shown with its story count. Market features are calculated independently per
+asset from historical hourly candles: simple and log returns, 24-hour price
+change, rolling 24-hour volatility, volume change, and a rolling volume z-score.
+All calculations use UTC. Rolling market features use only the current and earlier
+candles, while daily sentiment and market values are presented as same-period
+associations rather than causal evidence.
+
 The default provider is `openai`. The limit must be between 1 and 100 to keep
 each run bounded. Fake classifications are for development and testing only and
 must not be presented as analytical results.
@@ -221,7 +257,7 @@ test suite fast, repeatable, and independent of live API availability.
 | 1 | Foundation, database, API clients, and ingestion | Complete |
 | 2 | Article cleaning and structured LLM sentiment | Complete |
 | 3 | Human-labelled evaluation set and model comparison | In progress |
-| 4 | Time-series analytics and Streamlit dashboard | Planned |
+| 4 | Time-series analytics and Streamlit dashboard | Complete |
 | 5 | CI, deployment, and portfolio polish | Planned |
 
 The finished application will compare asset-specific news sentiment with price,
