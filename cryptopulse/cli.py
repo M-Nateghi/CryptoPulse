@@ -14,6 +14,7 @@ from cryptopulse.evaluation.labels import validate_labeling_csv
 from cryptopulse.evaluation.sampling import create_labeling_template
 from cryptopulse.ingestion.binance import BinanceClient
 from cryptopulse.ingestion.gdelt import ASSET_QUERIES, GdeltClient
+from cryptopulse.ingestion.google_news import GoogleNewsRssClient
 from cryptopulse.ingestion.service import ingest_market, ingest_news
 from cryptopulse.logging_config import configure_logging
 from cryptopulse.sentiment.fake_provider import FakeSentimentClassifier
@@ -61,7 +62,15 @@ def build_parser() -> argparse.ArgumentParser:
     )
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("ingest-market", help="Ingest Binance market candles.")
-    news_parser = commands.add_parser("ingest-news", help="Ingest GDELT news articles.")
+    news_parser = commands.add_parser(
+        "ingest-news", help="Ingest recent news article metadata."
+    )
+    news_parser.add_argument(
+        "--source",
+        choices=("gdelt", "google-news"),
+        default="gdelt",
+        help="News metadata source (default: gdelt).",
+    )
     news_parser.add_argument(
         "--assets",
         nargs="+",
@@ -151,22 +160,34 @@ def main(argv: Sequence[str] | None = None) -> int:
                     ingest_market(connection, BinanceClient(http_client))
 
             if args.command in {"ingest-news", "ingest-all"}:
+                news_source = (
+                    args.source if args.command == "ingest-news" else "gdelt"
+                )
+                news_base_url = (
+                    settings.google_news_base_url
+                    if news_source == "google-news"
+                    else settings.gdelt_base_url
+                )
                 with httpx.Client(
-                    base_url=settings.gdelt_base_url,
+                    base_url=news_base_url,
                     timeout=settings.gdelt_request_timeout_seconds,
                     headers={"User-Agent": USER_AGENT},
                 ) as http_client:
-                    gdelt_client = GdeltClient(http_client)
+                    news_client = (
+                        GoogleNewsRssClient(http_client)
+                        if news_source == "google-news"
+                        else GdeltClient(http_client)
+                    )
                     if args.command == "ingest-news":
                         ingest_news(
                             connection,
-                            gdelt_client,
+                            news_client,
                             assets=args.assets,
                             max_records=args.max_records,
                             timespan=args.timespan,
                         )
                     else:
-                        ingest_news(connection, gdelt_client)
+                        ingest_news(connection, news_client)
 
             if args.command == "classify-news":
                 if args.provider == "fake":

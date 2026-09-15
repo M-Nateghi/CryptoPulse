@@ -27,6 +27,8 @@ class StubBinanceClient:
 
 
 class StubGdeltClient:
+    source_name = "gdelt"
+
     def fetch_recent_articles_for_assets(self, assets, max_records, timespan):
         return [
             Article(
@@ -43,6 +45,8 @@ class StubGdeltClient:
 
 
 class FailingGdeltClient:
+    source_name = "gdelt"
+
     def fetch_recent_articles_for_assets(self, assets, max_records, timespan):
         raise RuntimeError(f"GDELT unavailable for {', '.join(assets)}")
 

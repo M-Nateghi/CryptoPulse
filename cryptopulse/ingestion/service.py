@@ -2,8 +2,9 @@ import logging
 import sqlite3
 from collections.abc import Iterable
 from datetime import UTC, datetime
+from typing import Protocol
 
-from cryptopulse.db.models import InsertSummary
+from cryptopulse.db.models import Article, InsertSummary
 from cryptopulse.db.repositories import (
     finish_ingestion_run,
     insert_articles,
@@ -11,9 +12,20 @@ from cryptopulse.db.repositories import (
     start_ingestion_run,
 )
 from cryptopulse.ingestion.binance import SYMBOL_TO_ASSET, BinanceClient
-from cryptopulse.ingestion.gdelt import ASSET_QUERIES, GdeltClient
+from cryptopulse.ingestion.gdelt import ASSET_QUERIES
 
 LOGGER = logging.getLogger(__name__)
+
+
+class NewsClient(Protocol):
+    source_name: str
+
+    def fetch_recent_articles_for_assets(
+        self,
+        assets: Iterable[str],
+        max_records: int,
+        timespan: str,
+    ) -> list[Article]: ...
 
 
 def _combine_summaries(first: InsertSummary, second: InsertSummary) -> InsertSummary:
@@ -84,20 +96,25 @@ def ingest_market(
 
 def ingest_news(
     connection: sqlite3.Connection,
-    client: GdeltClient,
+    client: NewsClient,
     assets: Iterable[str] = tuple(ASSET_QUERIES),
     max_records: int | None = None,
     timespan: str = "1d",
 ) -> InsertSummary:
     """Fetch and store recent news for supported assets."""
-    run_id = start_ingestion_run(connection, "gdelt", datetime.now(UTC))
+    source_name = client.source_name
+    run_id = start_ingestion_run(connection, source_name, datetime.now(UTC))
     connection.commit()
     total = InsertSummary(received=0, inserted=0, skipped=0)
 
     try:
         asset_list = tuple(assets)
         if asset_list:
-            LOGGER.info("Starting combined GDELT ingestion for %s", ", ".join(asset_list))
+            LOGGER.info(
+                "Starting combined %s ingestion for %s",
+                source_name,
+                ", ".join(asset_list),
+            )
             articles = client.fetch_recent_articles_for_assets(
                 asset_list,
                 max_records=(
@@ -111,7 +128,8 @@ def ingest_news(
             connection.commit()
             total = _combine_summaries(total, summary)
             LOGGER.info(
-                "GDELT combined query: received=%d inserted=%d skipped=%d",
+                "%s combined query: received=%d inserted=%d skipped=%d",
+                source_name,
                 summary.received,
                 summary.inserted,
                 summary.skipped,
@@ -128,5 +146,5 @@ def ingest_news(
         return total
     except Exception as error:
         _record_failed_run(connection, run_id, total, error)
-        LOGGER.exception("GDELT ingestion failed")
+        LOGGER.exception("%s ingestion failed", source_name)
         raise

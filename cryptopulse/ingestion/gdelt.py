@@ -73,6 +73,8 @@ def parse_articles(
 
 
 class GdeltClient:
+    source_name = "gdelt"
+
     def __init__(
         self,
         http_client: httpx.Client,

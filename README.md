@@ -166,6 +166,13 @@ Collect additional news for selected assets when preparing evaluation coverage:
 python -m cryptopulse.cli ingest-news --assets BNB --timespan 7d --max-records 100
 ```
 
+If GDELT is temporarily rate-limited, use the no-key Google News RSS metadata
+source without changing the downstream article schema:
+
+```powershell
+python -m cryptopulse.cli ingest-news --source google-news --assets SOL BNB --timespan 7d --max-records 100
+```
+
 Create the versioned human-labelling sheet after the database has sufficient
 coverage for every supported asset:
 
@@ -268,6 +275,7 @@ from unsupported causal claims.
 
 - [Binance public market data](https://developers.binance.com/docs/binance-spot-api-docs/rest-api/market-data-endpoints)
 - [GDELT DOC 2.0 API](https://blog.gdeltproject.org/gdelt-doc-2-0-api-debuts/)
+- [Google News RSS](https://news.google.com/rss)
 
 CryptoPulse is an independent educational portfolio project and is not
 affiliated with Binance or GDELT. It does not provide financial advice.
