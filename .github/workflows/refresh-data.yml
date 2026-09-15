@@ -45,12 +45,12 @@ jobs:
       - name: Ingest recent news
         run: |
           if ! python -m cryptopulse.cli ingest-news \
-            --source gdelt \
+            --source google-news \
             --timespan 1d \
             --max-records 50; then
-            echo "GDELT unavailable; using Google News RSS fallback."
+            echo "Google News unavailable; using GDELT fallback."
             python -m cryptopulse.cli ingest-news \
-              --source google-news \
+              --source gdelt \
               --timespan 1d \
               --max-records 50
           fi
