@@ -319,7 +319,8 @@ Every push to `main` and every pull request runs Ruff and the full test suite in
 GitHub Actions with Python 3.13. No API keys are required by CI.
 
 A separate scheduled workflow refreshes the public data snapshot every six
-hours. It fetches recent Binance candles and GDELT headlines, classifies only
+hours. It fetches recent Binance candles and GDELT headlines, automatically
+falling back to Google News RSS when GDELT is unavailable. It classifies only
 headlines not already processed by the current model and prompt, audits the
 export for secret-shaped text, and commits the refreshed demo database. The
 workflow requires the repository secret `CRYPTOPULSE_OPENAI_API_KEY`. GitHub

@@ -43,11 +43,17 @@ jobs:
         run: python -m cryptopulse.cli ingest-market
 
       - name: Ingest recent news
-        run: >-
-          python -m cryptopulse.cli ingest-news
-          --source gdelt
-          --timespan 1d
-          --max-records 50
+        run: |
+          if ! python -m cryptopulse.cli ingest-news \
+            --source gdelt \
+            --timespan 1d \
+            --max-records 50; then
+            echo "GDELT unavailable; using Google News RSS fallback."
+            python -m cryptopulse.cli ingest-news \
+              --source google-news \
+              --timespan 1d \
+              --max-records 50
+          fi
 
       - name: Classify unseen news
         run: python -m cryptopulse.cli classify-news --provider openai --limit 50
