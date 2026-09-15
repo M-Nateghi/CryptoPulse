@@ -88,6 +88,7 @@ def test_fake_classify_command_runs_end_to_end(monkeypatch, tmp_path):
 def test_openai_classify_command_requires_api_key(monkeypatch, tmp_path):
     monkeypatch.setenv("CRYPTOPULSE_DATABASE_PATH", str(tmp_path / "cli.db"))
     monkeypatch.delenv("CRYPTOPULSE_OPENAI_API_KEY", raising=False)
+    monkeypatch.chdir(tmp_path)
 
     exit_code = cli.main(["classify-news", "--provider", "openai", "--limit", "1"])
 

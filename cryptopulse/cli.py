@@ -11,7 +11,17 @@ from cryptopulse.config import Settings
 from cryptopulse.db.database import open_database
 from cryptopulse.db.schema import create_schema
 from cryptopulse.demo import export_demo_database
-from cryptopulse.evaluation.labels import validate_labeling_csv
+from cryptopulse.evaluation.assisted_labels import (
+    OpenAIAssistedLabelProvider,
+    generate_assisted_labels,
+)
+from cryptopulse.evaluation.baselines import FinBertPredictor, VaderPredictor
+from cryptopulse.evaluation.labels import (
+    validate_labeling_csv,
+    validate_relevance_csv,
+)
+from cryptopulse.evaluation.openai_predictions import OpenAIRelevancePredictor
+from cryptopulse.evaluation.runner import run_hybrid_evaluation
 from cryptopulse.evaluation.sampling import create_labeling_template
 from cryptopulse.ingestion.binance import BinanceClient
 from cryptopulse.ingestion.gdelt import ASSET_QUERIES, GdeltClient
@@ -43,6 +53,16 @@ def _evaluation_size(value: str) -> int:
         raise argparse.ArgumentTypeError("size must be an integer") from error
     if not 10 <= size <= 500:
         raise argparse.ArgumentTypeError("size must be between 10 and 500")
+    return size
+
+
+def _evaluation_batch_size(value: str) -> int:
+    try:
+        size = int(value)
+    except ValueError as error:
+        raise argparse.ArgumentTypeError("batch size must be an integer") from error
+    if not 1 <= size <= 25:
+        raise argparse.ArgumentTypeError("batch size must be between 1 and 25")
     return size
 
 
@@ -149,6 +169,72 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=Path("evaluation/labels_v1.csv"),
         help="Human-labeling CSV (default: evaluation/labels_v1.csv).",
+    )
+    validation_parser.add_argument(
+        "--scope",
+        choices=("relevance", "full"),
+        default="relevance",
+        help="Validate human relevance only or the original full-label format.",
+    )
+    assisted_parser = commands.add_parser(
+        "label-evaluation",
+        help="Generate traceable AI-assisted sentiment for human-relevant rows.",
+    )
+    assisted_parser.add_argument(
+        "--input",
+        type=Path,
+        default=Path("evaluation/labels_v1.csv"),
+        help="Human relevance CSV (default: evaluation/labels_v1.csv).",
+    )
+    assisted_parser.add_argument(
+        "--output",
+        type=Path,
+        default=Path("evaluation/ai_assisted_labels_v1.csv"),
+        help="AI-assisted output CSV.",
+    )
+    assisted_parser.add_argument(
+        "--batch-size",
+        type=_evaluation_batch_size,
+        default=20,
+        help="Headlines per OpenAI request (1-25, default: 20).",
+    )
+    assisted_parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Replace an existing AI-assisted label file.",
+    )
+    run_evaluation_parser = commands.add_parser(
+        "run-evaluation",
+        help="Run OpenAI relevance and VADER/FinBERT sentiment evaluation.",
+    )
+    run_evaluation_parser.add_argument(
+        "--labels",
+        type=Path,
+        default=Path("evaluation/labels_v1.csv"),
+        help="Human relevance CSV.",
+    )
+    run_evaluation_parser.add_argument(
+        "--assisted-labels",
+        type=Path,
+        default=Path("evaluation/ai_assisted_labels_v1.csv"),
+        help="AI-assisted sentiment CSV.",
+    )
+    run_evaluation_parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=Path("evaluation"),
+        help="Evaluation artifact directory (default: evaluation).",
+    )
+    run_evaluation_parser.add_argument(
+        "--batch-size",
+        type=_evaluation_batch_size,
+        default=20,
+        help="Headlines per OpenAI request (1-25, default: 20).",
+    )
+    run_evaluation_parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Replace existing evaluation outputs.",
     )
     demo_parser = commands.add_parser(
         "export-demo",
@@ -278,14 +364,86 @@ def main(argv: Sequence[str] | None = None) -> int:
                 )
 
             if args.command == "validate-evaluation":
-                summary = validate_labeling_csv(args.input)
+                if args.scope == "full":
+                    summary = validate_labeling_csv(args.input)
+                    LOGGER.info(
+                        "Validated full human labels: articles=%d relevant=%d "
+                        "irrelevant=%d asset_labels=%d",
+                        summary.total_articles,
+                        summary.relevant,
+                        summary.irrelevant,
+                        summary.asset_labels,
+                    )
+                else:
+                    summary = validate_relevance_csv(args.input)
+                    LOGGER.info(
+                        "Validated human relevance: articles=%d relevant=%d "
+                        "irrelevant=%d",
+                        summary.total_articles,
+                        summary.relevant,
+                        summary.irrelevant,
+                    )
+
+            if args.command == "label-evaluation":
+                if settings.openai_api_key is None:
+                    raise ValueError(
+                        "CRYPTOPULSE_OPENAI_API_KEY is required for OpenAI"
+                    )
+                with OpenAI(
+                    api_key=settings.openai_api_key.get_secret_value(),
+                    timeout=settings.openai_timeout_seconds,
+                    max_retries=2,
+                ) as openai_client:
+                    summary = generate_assisted_labels(
+                        connection=connection,
+                        provider=OpenAIAssistedLabelProvider(
+                            openai_client,
+                            model=settings.openai_model,
+                        ),
+                        input_path=args.input,
+                        output_path=args.output,
+                        batch_size=args.batch_size,
+                        force=args.force,
+                    )
                 LOGGER.info(
-                    "Validated human labels: articles=%d relevant=%d "
-                    "irrelevant=%d asset_labels=%d",
-                    summary.total_articles,
-                    summary.relevant,
-                    summary.irrelevant,
+                    "AI-assisted labels: articles=%d asset_labels=%d model=%s "
+                    "output=%s",
+                    summary.articles,
                     summary.asset_labels,
+                    summary.identity.model,
+                    summary.output_path,
+                )
+
+            if args.command == "run-evaluation":
+                if settings.openai_api_key is None:
+                    raise ValueError(
+                        "CRYPTOPULSE_OPENAI_API_KEY is required for OpenAI"
+                    )
+                with OpenAI(
+                    api_key=settings.openai_api_key.get_secret_value(),
+                    timeout=settings.openai_timeout_seconds,
+                    max_retries=2,
+                ) as openai_client:
+                    summary = run_hybrid_evaluation(
+                        human_path=args.labels,
+                        assisted_path=args.assisted_labels,
+                        output_directory=args.output_dir,
+                        relevance_predictor=OpenAIRelevancePredictor(
+                            openai_client,
+                            model=settings.openai_model,
+                        ),
+                        baseline_predictors=(VaderPredictor(), FinBertPredictor()),
+                        batch_size=args.batch_size,
+                        force=args.force,
+                    )
+                LOGGER.info(
+                    "Evaluation complete: human_articles=%d assisted_asset_labels=%d "
+                    "metric_rows=%d errors=%d output=%s",
+                    summary.human_articles,
+                    summary.assisted_asset_labels,
+                    summary.metrics,
+                    summary.errors,
+                    summary.output_directory,
                 )
 
             if args.command == "export-demo":

@@ -352,10 +352,54 @@ def render_market_analysis(
 def render_evaluation() -> None:
     metrics_path = Path("evaluation/model_metrics.csv")
     if not metrics_path.exists():
-        st.info("Evaluation results are pending the completed human-labelled dataset.")
+        st.info("Evaluation results have not been generated yet.")
         return
     metrics = pd.read_csv(metrics_path)
-    st.dataframe(metrics, hide_index=True, width="stretch")
+    st.caption(
+        "Relevance is measured against independent human labels. Sentiment results "
+        "measure agreement with AI-assisted labels and are not human-grounded accuracy."
+    )
+    display_metrics = metrics.copy()
+    percentage_columns = (
+        "accuracy",
+        "macro_precision",
+        "macro_recall",
+        "macro_f1",
+        "weighted_f1",
+    )
+    for column in percentage_columns:
+        display_metrics[column] = display_metrics[column].map(
+            lambda value: f"{float(value):.1%}"
+        )
+    st.dataframe(display_metrics, hide_index=True, width="stretch")
+
+    errors_path = Path("evaluation/model_errors.csv")
+    if not errors_path.exists():
+        return
+    errors = pd.read_csv(errors_path).fillna("")
+    st.subheader("Model disagreements")
+    selected_task = st.selectbox(
+        "Evaluation task",
+        errors["task"].drop_duplicates().tolist(),
+        key="evaluation_task",
+    )
+    task_errors = errors[errors["task"] == selected_task]
+    selected_model = st.selectbox(
+        "Model",
+        task_errors["model"].drop_duplicates().tolist(),
+        key="evaluation_model",
+    )
+    visible_columns = [
+        "title",
+        "asset",
+        "reference",
+        "prediction",
+    ]
+    st.dataframe(
+        task_errors[task_errors["model"] == selected_model][visible_columns],
+        hide_index=True,
+        width="stretch",
+    )
 
 
 settings = Settings()
@@ -419,7 +463,8 @@ if st.sidebar.button("Refresh data", width="stretch"):
     st.cache_data.clear()
     st.rerun()
 st.sidebar.caption(
-    f"Data mode: {data_mode}. Sentiment uses OpenAI classifications only."
+    f"Data mode: {data_mode}. Sentiment uses human relevance and "
+    "OpenAI-assisted asset labels."
 )
 
 filtered_market = filter_by_date(

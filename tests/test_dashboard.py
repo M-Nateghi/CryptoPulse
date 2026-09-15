@@ -16,6 +16,4 @@ def test_dashboard_renders_honest_empty_states(tmp_path, monkeypatch):
     messages = [message.value for message in app.info]
     assert "No OpenAI sentiment results match the current filters." in messages
     assert "No market observations match the current filters." in messages
-    assert "Evaluation results are pending the completed human-labelled dataset." in (
-        messages
-    )
+    assert "Evaluation results have not been generated yet." in messages

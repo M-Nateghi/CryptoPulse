@@ -1,0 +1,19 @@
+task,model,reference,prediction,count
+relevance,OpenAI (gpt-5.6-luna),irrelevant,irrelevant,52
+relevance,OpenAI (gpt-5.6-luna),irrelevant,relevant,21
+relevance,OpenAI (gpt-5.6-luna),relevant,relevant,27
+sentiment_agreement,VADER 3.3.2,bearish,bearish,3
+sentiment_agreement,VADER 3.3.2,bearish,bullish,4
+sentiment_agreement,VADER 3.3.2,bearish,neutral,2
+sentiment_agreement,VADER 3.3.2,bullish,bullish,19
+sentiment_agreement,VADER 3.3.2,bullish,neutral,8
+sentiment_agreement,VADER 3.3.2,neutral,bearish,2
+sentiment_agreement,VADER 3.3.2,neutral,neutral,7
+sentiment_agreement,ProsusAI/finbert,bearish,bearish,6
+sentiment_agreement,ProsusAI/finbert,bearish,bullish,3
+sentiment_agreement,ProsusAI/finbert,bullish,bearish,3
+sentiment_agreement,ProsusAI/finbert,bullish,bullish,16
+sentiment_agreement,ProsusAI/finbert,bullish,neutral,8
+sentiment_agreement,ProsusAI/finbert,neutral,bearish,3
+sentiment_agreement,ProsusAI/finbert,neutral,bullish,2
+sentiment_agreement,ProsusAI/finbert,neutral,neutral,4

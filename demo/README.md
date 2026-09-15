@@ -10,8 +10,10 @@ python -m cryptopulse.cli export-demo --market-hours 168 --force
 ```
 
 The export includes recent market candles and only the latest successful,
-relevant OpenAI classification for each article. It excludes secrets, ingestion
-audits, fake-provider classifications, and the human-labelling sheet.
+relevant OpenAI classification for each article. The current sentiment records
+combine independent human relevance decisions with traceable OpenAI-assisted
+asset labels. The export excludes secrets, ingestion audits, fake-provider
+classifications, and the human-labelling sheet itself.
 
 Before committing a refreshed snapshot, run:
 

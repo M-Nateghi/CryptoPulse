@@ -1,0 +1,91 @@
+sample_id,article_id,title,asset,reference_sentiment,reference_source,model,predicted_sentiment,model_score
+1,93,"Strive Boosts Bitcoin Holdings by $109 Million , Funded by Perpetual Preferred Stock",BTC,bullish,OpenAI-assisted,VADER 3.3.2,bullish,0.3182
+3,296,"BNB Chain Overtakes Solana in DeFi TVL, Closing In on Ethereum's Lead",BNB,bullish,OpenAI-assisted,VADER 3.3.2,neutral,0.0
+3,296,"BNB Chain Overtakes Solana in DeFi TVL, Closing In on Ethereum's Lead",SOL,bearish,OpenAI-assisted,VADER 3.3.2,neutral,0.0
+6,297,BNB Chain Tops 2026 Tokenized Asset Growth With $3.62 Billion Inflow,BNB,bullish,OpenAI-assisted,VADER 3.3.2,bullish,0.8126
+7,335,Solana Price Prediction: SOL Could Extend Rally if $100 Support Holds,SOL,bullish,OpenAI-assisted,VADER 3.3.2,bullish,0.5267
+11,227,Bitcoin ETF Outflows Reach $167M as Ether and Solana ETFs Rebound,BTC,bearish,OpenAI-assisted,VADER 3.3.2,neutral,0.0258
+11,227,Bitcoin ETF Outflows Reach $167M as Ether and Solana ETFs Rebound,ETH,bullish,OpenAI-assisted,VADER 3.3.2,neutral,0.0258
+11,227,Bitcoin ETF Outflows Reach $167M as Ether and Solana ETFs Rebound,SOL,bullish,OpenAI-assisted,VADER 3.3.2,neutral,0.0258
+17,219,"The SEC Cleared XRP , Bitcoin , Ethereum and Solana for Nasdaq Texas Commodity Trusts . What It Does and Does Not Do .",BTC,bullish,OpenAI-assisted,VADER 3.3.2,bullish,0.5423
+17,219,"The SEC Cleared XRP , Bitcoin , Ethereum and Solana for Nasdaq Texas Commodity Trusts . What It Does and Does Not Do .",ETH,bullish,OpenAI-assisted,VADER 3.3.2,bullish,0.5423
+17,219,"The SEC Cleared XRP , Bitcoin , Ethereum and Solana for Nasdaq Texas Commodity Trusts . What It Does and Does Not Do .",SOL,bullish,OpenAI-assisted,VADER 3.3.2,bullish,0.5423
+25,282,"Crypto: In 2026, BNB Chain Emerges as the Global Leader in RWA Growth",BNB,bullish,OpenAI-assisted,VADER 3.3.2,bullish,0.3818
+26,363,Ethereum Wins Institutional Money. BNB Chain Gets Tokenized Stocks.,ETH,bullish,OpenAI-assisted,VADER 3.3.2,bullish,0.5719
+26,363,Ethereum Wins Institutional Money. BNB Chain Gets Tokenized Stocks.,BNB,bullish,OpenAI-assisted,VADER 3.3.2,bullish,0.5719
+28,94,Ethereum remains stuck in a tight range as US CPI looms . What are the key levels to watch ?,ETH,neutral,OpenAI-assisted,VADER 3.3.2,bearish,-0.3818
+29,318,"Crypto never closes, but Bitcoin, Ethereum, XRP and Solana now move on Wall Street time",BTC,neutral,OpenAI-assisted,VADER 3.3.2,neutral,0.0
+29,318,"Crypto never closes, but Bitcoin, Ethereum, XRP and Solana now move on Wall Street time",ETH,neutral,OpenAI-assisted,VADER 3.3.2,neutral,0.0
+29,318,"Crypto never closes, but Bitcoin, Ethereum, XRP and Solana now move on Wall Street time",SOL,neutral,OpenAI-assisted,VADER 3.3.2,neutral,0.0
+35,303,Solana Surges 3.4% on Strong Adoption and Institutional Flows,SOL,bullish,OpenAI-assisted,VADER 3.3.2,bullish,0.5106
+42,274,"Treasury firms stack Ethereum, Solana, and Bitcoin through a jittery September market",ETH,bullish,OpenAI-assisted,VADER 3.3.2,bullish,0.2023
+42,274,"Treasury firms stack Ethereum, Solana, and Bitcoin through a jittery September market",SOL,bullish,OpenAI-assisted,VADER 3.3.2,bullish,0.2023
+42,274,"Treasury firms stack Ethereum, Solana, and Bitcoin through a jittery September market",BTC,bullish,OpenAI-assisted,VADER 3.3.2,bullish,0.2023
+44,345,Solana price prediction: SOL defends $100 as bulls eye $107 breakout,SOL,bullish,OpenAI-assisted,VADER 3.3.2,neutral,0.0
+45,159,Here Why Im Buying Ethereum Right Now,ETH,bullish,OpenAI-assisted,VADER 3.3.2,neutral,0.0
+53,271,"Bitcoin, Solana, XRP Tumble Ahead Of CPI – And Retail Traders Aren’t Feeling Bullish",BTC,bearish,OpenAI-assisted,VADER 3.3.2,bullish,0.128
+53,271,"Bitcoin, Solana, XRP Tumble Ahead Of CPI – And Retail Traders Aren’t Feeling Bullish",SOL,bearish,OpenAI-assisted,VADER 3.3.2,bullish,0.128
+56,43,"XRP , Bitcoin , Ethereum and Solana Are All Up More Than 20 % in a Month and Still Down for the Year . Which Recovers First ?",BTC,neutral,OpenAI-assisted,VADER 3.3.2,neutral,0.0
+56,43,"XRP , Bitcoin , Ethereum and Solana Are All Up More Than 20 % in a Month and Still Down for the Year . Which Recovers First ?",ETH,neutral,OpenAI-assisted,VADER 3.3.2,neutral,0.0
+56,43,"XRP , Bitcoin , Ethereum and Solana Are All Up More Than 20 % in a Month and Still Down for the Year . Which Recovers First ?",SOL,neutral,OpenAI-assisted,VADER 3.3.2,neutral,0.0
+62,275,Crypto: Solana triples The Maximum Size of Its Transactions,SOL,bullish,OpenAI-assisted,VADER 3.3.2,neutral,0.0
+63,294,BNB Chain leads 2026 RWA growth with $3.62B,BNB,bullish,OpenAI-assisted,VADER 3.3.2,bullish,0.3818
+72,290,"Is Solana undervalued? SOL up 35% in Q3, but still trails Ethereum",SOL,bullish,OpenAI-assisted,VADER 3.3.2,neutral,0.0
+72,290,"Is Solana undervalued? SOL up 35% in Q3, but still trails Ethereum",ETH,neutral,OpenAI-assisted,VADER 3.3.2,neutral,0.0
+75,284,"Crypto Prices Today: Why Bitcoin, XRP and Solana Are All Down Before the CLARITY Act Vote",BTC,bearish,OpenAI-assisted,VADER 3.3.2,bullish,0.5319
+75,284,"Crypto Prices Today: Why Bitcoin, XRP and Solana Are All Down Before the CLARITY Act Vote",SOL,bearish,OpenAI-assisted,VADER 3.3.2,bullish,0.5319
+77,347,"BNB Chain leads in 2026 RWA growth with $3.6B, but Solana tops in real crypto activity and trading volume.",BNB,bullish,OpenAI-assisted,VADER 3.3.2,bullish,0.7391
+77,347,"BNB Chain leads in 2026 RWA growth with $3.6B, but Solana tops in real crypto activity and trading volume.",SOL,bullish,OpenAI-assisted,VADER 3.3.2,bullish,0.7391
+78,337,"ETH, SOL, XRP May Gain More Than Bitcoin if US Senate Advances CLARITY Act",ETH,bullish,OpenAI-assisted,VADER 3.3.2,bullish,0.7804
+78,337,"ETH, SOL, XRP May Gain More Than Bitcoin if US Senate Advances CLARITY Act",SOL,bullish,OpenAI-assisted,VADER 3.3.2,bullish,0.7804
+82,322,Solana Activates Transaction V1 Upgrade to Triple Data Capacity as LiquidChain Presale Nears $1M,SOL,bullish,OpenAI-assisted,VADER 3.3.2,neutral,0.0
+83,361,"BNB Chain Shows Quantum Defense Works, Pays With 40% Throughput Drop",BNB,neutral,OpenAI-assisted,VADER 3.3.2,bearish,-0.1531
+85,356,BNB Chain leads 2026 real-world asset growth wi...,BNB,bullish,OpenAI-assisted,VADER 3.3.2,bullish,0.6249
+87,355,"Altcoin rally loses steam: Institutional bets fail to save Ethereum, Solana, and Aptos",ETH,bearish,OpenAI-assisted,VADER 3.3.2,bearish,-0.3818
+87,355,"Altcoin rally loses steam: Institutional bets fail to save Ethereum, Solana, and Aptos",SOL,bearish,OpenAI-assisted,VADER 3.3.2,bearish,-0.3818
+89,136,Bitcoin Reversal Risk Grows After Rejection Above $80K,BTC,bearish,OpenAI-assisted,VADER 3.3.2,bearish,-0.6808
+1,93,"Strive Boosts Bitcoin Holdings by $109 Million , Funded by Perpetual Preferred Stock",BTC,bullish,OpenAI-assisted,ProsusAI/finbert,bullish,0.9320617318153381
+3,296,"BNB Chain Overtakes Solana in DeFi TVL, Closing In on Ethereum's Lead",BNB,bullish,OpenAI-assisted,ProsusAI/finbert,bullish,0.7242457270622253
+3,296,"BNB Chain Overtakes Solana in DeFi TVL, Closing In on Ethereum's Lead",SOL,bearish,OpenAI-assisted,ProsusAI/finbert,bullish,0.7242457270622253
+6,297,BNB Chain Tops 2026 Tokenized Asset Growth With $3.62 Billion Inflow,BNB,bullish,OpenAI-assisted,ProsusAI/finbert,bullish,0.9090970158576965
+7,335,Solana Price Prediction: SOL Could Extend Rally if $100 Support Holds,SOL,bullish,OpenAI-assisted,ProsusAI/finbert,bullish,0.9000970125198364
+11,227,Bitcoin ETF Outflows Reach $167M as Ether and Solana ETFs Rebound,BTC,bearish,OpenAI-assisted,ProsusAI/finbert,bullish,0.8834800720214844
+11,227,Bitcoin ETF Outflows Reach $167M as Ether and Solana ETFs Rebound,ETH,bullish,OpenAI-assisted,ProsusAI/finbert,bullish,0.8834800720214844
+11,227,Bitcoin ETF Outflows Reach $167M as Ether and Solana ETFs Rebound,SOL,bullish,OpenAI-assisted,ProsusAI/finbert,bullish,0.8834800720214844
+17,219,"The SEC Cleared XRP , Bitcoin , Ethereum and Solana for Nasdaq Texas Commodity Trusts . What It Does and Does Not Do .",BTC,bullish,OpenAI-assisted,ProsusAI/finbert,neutral,0.929576575756073
+17,219,"The SEC Cleared XRP , Bitcoin , Ethereum and Solana for Nasdaq Texas Commodity Trusts . What It Does and Does Not Do .",ETH,bullish,OpenAI-assisted,ProsusAI/finbert,neutral,0.929576575756073
+17,219,"The SEC Cleared XRP , Bitcoin , Ethereum and Solana for Nasdaq Texas Commodity Trusts . What It Does and Does Not Do .",SOL,bullish,OpenAI-assisted,ProsusAI/finbert,neutral,0.929576575756073
+25,282,"Crypto: In 2026, BNB Chain Emerges as the Global Leader in RWA Growth",BNB,bullish,OpenAI-assisted,ProsusAI/finbert,bullish,0.8928442001342773
+26,363,Ethereum Wins Institutional Money. BNB Chain Gets Tokenized Stocks.,ETH,bullish,OpenAI-assisted,ProsusAI/finbert,neutral,0.811978280544281
+26,363,Ethereum Wins Institutional Money. BNB Chain Gets Tokenized Stocks.,BNB,bullish,OpenAI-assisted,ProsusAI/finbert,neutral,0.811978280544281
+28,94,Ethereum remains stuck in a tight range as US CPI looms . What are the key levels to watch ?,ETH,neutral,OpenAI-assisted,ProsusAI/finbert,neutral,0.7420972585678101
+29,318,"Crypto never closes, but Bitcoin, Ethereum, XRP and Solana now move on Wall Street time",BTC,neutral,OpenAI-assisted,ProsusAI/finbert,neutral,0.9366000890731812
+29,318,"Crypto never closes, but Bitcoin, Ethereum, XRP and Solana now move on Wall Street time",ETH,neutral,OpenAI-assisted,ProsusAI/finbert,neutral,0.9366000890731812
+29,318,"Crypto never closes, but Bitcoin, Ethereum, XRP and Solana now move on Wall Street time",SOL,neutral,OpenAI-assisted,ProsusAI/finbert,neutral,0.9366000890731812
+35,303,Solana Surges 3.4% on Strong Adoption and Institutional Flows,SOL,bullish,OpenAI-assisted,ProsusAI/finbert,bullish,0.9519464373588562
+42,274,"Treasury firms stack Ethereum, Solana, and Bitcoin through a jittery September market",ETH,bullish,OpenAI-assisted,ProsusAI/finbert,bearish,0.940018355846405
+42,274,"Treasury firms stack Ethereum, Solana, and Bitcoin through a jittery September market",SOL,bullish,OpenAI-assisted,ProsusAI/finbert,bearish,0.940018355846405
+42,274,"Treasury firms stack Ethereum, Solana, and Bitcoin through a jittery September market",BTC,bullish,OpenAI-assisted,ProsusAI/finbert,bearish,0.940018355846405
+44,345,Solana price prediction: SOL defends $100 as bulls eye $107 breakout,SOL,bullish,OpenAI-assisted,ProsusAI/finbert,neutral,0.5545864701271057
+45,159,Here Why Im Buying Ethereum Right Now,ETH,bullish,OpenAI-assisted,ProsusAI/finbert,neutral,0.9431726932525635
+53,271,"Bitcoin, Solana, XRP Tumble Ahead Of CPI – And Retail Traders Aren’t Feeling Bullish",BTC,bearish,OpenAI-assisted,ProsusAI/finbert,bearish,0.8847992420196533
+53,271,"Bitcoin, Solana, XRP Tumble Ahead Of CPI – And Retail Traders Aren’t Feeling Bullish",SOL,bearish,OpenAI-assisted,ProsusAI/finbert,bearish,0.8847992420196533
+56,43,"XRP , Bitcoin , Ethereum and Solana Are All Up More Than 20 % in a Month and Still Down for the Year . Which Recovers First ?",BTC,neutral,OpenAI-assisted,ProsusAI/finbert,bearish,0.9245820641517639
+56,43,"XRP , Bitcoin , Ethereum and Solana Are All Up More Than 20 % in a Month and Still Down for the Year . Which Recovers First ?",ETH,neutral,OpenAI-assisted,ProsusAI/finbert,bearish,0.9245820641517639
+56,43,"XRP , Bitcoin , Ethereum and Solana Are All Up More Than 20 % in a Month and Still Down for the Year . Which Recovers First ?",SOL,neutral,OpenAI-assisted,ProsusAI/finbert,bearish,0.9245820641517639
+62,275,Crypto: Solana triples The Maximum Size of Its Transactions,SOL,bullish,OpenAI-assisted,ProsusAI/finbert,neutral,0.9219798445701599
+63,294,BNB Chain leads 2026 RWA growth with $3.62B,BNB,bullish,OpenAI-assisted,ProsusAI/finbert,bullish,0.9029947519302368
+72,290,"Is Solana undervalued? SOL up 35% in Q3, but still trails Ethereum",SOL,bullish,OpenAI-assisted,ProsusAI/finbert,bullish,0.9554212093353271
+72,290,"Is Solana undervalued? SOL up 35% in Q3, but still trails Ethereum",ETH,neutral,OpenAI-assisted,ProsusAI/finbert,bullish,0.9554212093353271
+75,284,"Crypto Prices Today: Why Bitcoin, XRP and Solana Are All Down Before the CLARITY Act Vote",BTC,bearish,OpenAI-assisted,ProsusAI/finbert,bearish,0.6098119020462036
+75,284,"Crypto Prices Today: Why Bitcoin, XRP and Solana Are All Down Before the CLARITY Act Vote",SOL,bearish,OpenAI-assisted,ProsusAI/finbert,bearish,0.6098119020462036
+77,347,"BNB Chain leads in 2026 RWA growth with $3.6B, but Solana tops in real crypto activity and trading volume.",BNB,bullish,OpenAI-assisted,ProsusAI/finbert,bullish,0.9239757657051086
+77,347,"BNB Chain leads in 2026 RWA growth with $3.6B, but Solana tops in real crypto activity and trading volume.",SOL,bullish,OpenAI-assisted,ProsusAI/finbert,bullish,0.9239757657051086
+78,337,"ETH, SOL, XRP May Gain More Than Bitcoin if US Senate Advances CLARITY Act",ETH,bullish,OpenAI-assisted,ProsusAI/finbert,bullish,0.8964196443557739
+78,337,"ETH, SOL, XRP May Gain More Than Bitcoin if US Senate Advances CLARITY Act",SOL,bullish,OpenAI-assisted,ProsusAI/finbert,bullish,0.8964196443557739
+82,322,Solana Activates Transaction V1 Upgrade to Triple Data Capacity as LiquidChain Presale Nears $1M,SOL,bullish,OpenAI-assisted,ProsusAI/finbert,bullish,0.9457652568817139
+83,361,"BNB Chain Shows Quantum Defense Works, Pays With 40% Throughput Drop",BNB,neutral,OpenAI-assisted,ProsusAI/finbert,bullish,0.7663118243217468
+85,356,BNB Chain leads 2026 real-world asset growth wi...,BNB,bullish,OpenAI-assisted,ProsusAI/finbert,bullish,0.6553220152854919
+87,355,"Altcoin rally loses steam: Institutional bets fail to save Ethereum, Solana, and Aptos",ETH,bearish,OpenAI-assisted,ProsusAI/finbert,bearish,0.9634116291999817
+87,355,"Altcoin rally loses steam: Institutional bets fail to save Ethereum, Solana, and Aptos",SOL,bearish,OpenAI-assisted,ProsusAI/finbert,bearish,0.9634116291999817
+89,136,Bitcoin Reversal Risk Grows After Rejection Above $80K,BTC,bearish,OpenAI-assisted,ProsusAI/finbert,bullish,0.7085534930229187

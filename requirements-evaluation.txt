@@ -1,0 +1,6 @@
+-r requirements.txt
+
+# Optional Stage 3 baselines. These are not installed by the public dashboard.
+torch==2.14.0
+transformers==5.17.0
+vaderSentiment==3.3.2

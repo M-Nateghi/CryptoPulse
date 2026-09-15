@@ -1,0 +1,4 @@
+task,reference,model,accuracy,macro_precision,macro_recall,macro_f1,weighted_f1,support,interpretation
+relevance,human,OpenAI (gpt-5.6-luna),0.7900,0.7812,0.8562,0.7760,0.8018,100,Accuracy against independent human relevance labels.
+sentiment_agreement,OpenAI-assisted,VADER 3.3.2,0.6444,0.6126,0.6049,0.5757,0.6494,45,Agreement with AI-assisted labels; not human-grounded accuracy.
+sentiment_agreement,OpenAI-assisted,ProsusAI/finbert,0.5778,0.5317,0.5679,0.5397,0.5905,45,Agreement with AI-assisted labels; not human-grounded accuracy.

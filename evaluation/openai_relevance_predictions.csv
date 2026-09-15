@@ -1,0 +1,101 @@
+sample_id,article_id,title,human_relevance,predicted_relevance,provider,model,prompt_version
+1,93,"Strive Boosts Bitcoin Holdings by $109 Million , Funded by Perpetual Preferred Stock",relevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+2,76,The Einstein test : what happens when AI tries to rediscover relativity ?,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+3,296,"BNB Chain Overtakes Solana in DeFi TVL, Closing In on Ethereum's Lead",relevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+4,226,3 Quantum Stocks Just Scored $100 Million in Government Funding . Which Is the Best to Buy Now ?,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+5,304,Is BNB Binance Stock? No—Here’s the $10.9 Billion XRP Market-Cap Gap,irrelevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+6,297,BNB Chain Tops 2026 Tokenized Asset Growth With $3.62 Billion Inflow,relevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+7,335,Solana Price Prediction: SOL Could Extend Rally if $100 Support Holds,relevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+8,263,Surviving Summer in BCS : From Sky Camping to Silver - Mining Museums,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+9,71,Lista DAO ( LISTA ) Self Reported Market Capitalization Reaches $34 . 86 Million,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+10,228,FxWirePro - Key Crypto Updates - EconoTimes,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+11,227,Bitcoin ETF Outflows Reach $167M as Ether and Solana ETFs Rebound,relevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+12,208,Stablecoin Summit 2026 by XREX Group Returns to Singapore as Stablecoins Mature Into a Financial Infrastructure,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+13,30,Singaporean national Malone Lam pleads guilty in US Court over $245M crypto heist case,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+14,17,IonQ CEO Shares How Long It Will Take Quantum Computers To Hack Bitcoin Encryption . And Argues It Will Happen Sooner Than Expected,irrelevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+15,358,"BNB, SOL, and Pepeto: Which Is the Next 100x Crypto Before the Listing Closes It?",irrelevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+16,55,The wittiest quant describes how AI is changing his job,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+17,219,"The SEC Cleared XRP , Bitcoin , Ethereum and Solana for Nasdaq Texas Commodity Trusts . What It Does and Does Not Do .",relevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+18,171,Amorepacific Museum of Art Presents Sol LeWitt : Open Structure,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+19,7,Tech had a rough summer . Where these investors see opportunities ahead,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+20,291,"What Is the Crypto Clarity Act? What Tuesday’s Senate Vote Decides for XRP, Bitcoin, Ethereum, and Solana",irrelevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+21,156,Victoria Beckham Beauty Hotel Portofino Extrait : Review,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+22,352,Anthropic Warns of AI Scams: Why Indian Crypto Investors Face More Convincing Fraud,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+23,57,Ultra ( UOS ) Reaches One Day Volume of $70 . 94 Thousand,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+24,37,Gnosis 1 - Day Trading Volume Tops $754 . 58 Thousand ( GNO ),irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+25,282,"Crypto: In 2026, BNB Chain Emerges as the Global Leader in RWA Growth",relevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+26,363,Ethereum Wins Institutional Money. BNB Chain Gets Tokenized Stocks.,relevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+27,223,Hunter Biden Crypto Memecoin Launch Went Even Worse Than Predicted,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+28,94,Ethereum remains stuck in a tight range as US CPI looms . What are the key levels to watch ?,relevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+29,318,"Crypto never closes, but Bitcoin, Ethereum, XRP and Solana now move on Wall Street time",relevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+30,133,"Oil heads for $US100 , Asian stocks subdued",irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+31,339,"Ethereum, Solana, and Base control 92% of the e...",irrelevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+32,110,Singaporean Malone Lam pleads guilty to orchestrating $300 million bitcoin theft from US resident,irrelevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+33,182,Man pleads guilty to orchestrating $240 million bitcoin theft,irrelevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+34,328,Solana Sees 2.35M SOL Flow To Exchanges As MVRV Ratio Hits Lowest Level Since May 2022,irrelevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+35,303,Solana Surges 3.4% on Strong Adoption and Institutional Flows,relevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+36,65,16 Jobs That Barely Existed 10 Years Ago but Now Pay Six Figures,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+37,36,Tribe ( TRIBE ) Hits 1 - Day Volume of $3 . 86 Thousand,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+38,145,Amorepacific Museum of Art Presents Sol LeWitt : Open Structure,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+39,365,GoMining Launches Digital Bitcoin Miners as Gifts for Crypto and Non-Crypto Users,irrelevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+40,234,South Korea trying to learn if Kim Jong Un has a son but daughter status as heir appears solid – Winnipeg Free Press,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+41,338,Upbit-Naver Deal Faces Regulatory Clash Over Ownership Rules,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+42,274,"Treasury firms stack Ethereum, Solana, and Bitcoin through a jittery September market",relevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+43,146,Man pleads guilty to orchestrating $240 million bitcoin theft,irrelevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+44,345,Solana price prediction: SOL defends $100 as bulls eye $107 breakout,relevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+45,159,Here Why Im Buying Ethereum Right Now,relevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+46,63,SLT ( SLT ) Hits Self Reported Market Capitalization of $31 . 41 Million,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+47,189,Bitcoin Wave Analysis - ActionForex,irrelevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+48,58,Strong ( STRONG ) Market Capitalization Achieves $78 . 78 Thousand,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+49,340,"'Long Way to Flip ETH,' Binance's CZ Reacts as BNB Chain Outperforms Solana in DeFi TVL",irrelevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+50,329,U.S. DOJ seeks $61M in alleged Iran oil crypto proceeds,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+51,125,"Oil heads for $100 , Asia stocks subdued as Middle East tensions escalate",irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+52,194,"OpenAI Researchers Burn $7 , 000 Daily on AI Agents as Machine Labor Overtakes Humans",irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+53,271,"Bitcoin, Solana, XRP Tumble Ahead Of CPI – And Retail Traders Aren’t Feeling Bullish",relevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+54,319,Top 3 Altcoins To Buy Now as Altcoin Season Index Jumps,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+55,138,Sam Altman Brother Shares Blunt Reaction to First  Artificial  Trailer,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+56,43,"XRP , Bitcoin , Ethereum and Solana Are All Up More Than 20 % in a Month and Still Down for the Year . Which Recovers First ?",relevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+57,9,10 Crypto Mysteries That Still Have No Good Answer,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+58,313,Zcash leads crypto surge; BNB and Hyperliquid h...,irrelevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+59,302,Bulgaria passes law requiring crypto firms to report user transactions,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+60,210,CLARITY Act : Why Washington could be crypto biggest September catalyst,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+61,327,Can Solana overcome Pump.fun’s $7.88M selling? Answer may depend on…,irrelevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+62,275,Crypto: Solana triples The Maximum Size of Its Transactions,relevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+63,294,BNB Chain leads 2026 RWA growth with $3.62B,relevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+64,84,A closer look at New Online Casino Canada 2026 : top games and lucrative bonus – Chennaionline,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+65,259,PYMNTS | Clarity Act Faces Sept . 15 Make - or - Break Vote in Senate,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+66,326,Upcoming Crypto Presales on BNB Chain: MemeToro’s Road to Testnet Deployment and Independent Review,irrelevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+67,47,"The Best of Times , the Wokest of Times : Steak  n Shake Fattens Coffers As Nike  Sacrifice It All",irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+68,14,Nonco Expands Institutional Collateral Toolkit from Tokenized Money Market Funds to Secured Sovereign Debt,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+69,49,Power Protocol Reaches Self Reported Market Capitalization of $18 . 45 Million ( POWER ),irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+70,168,The New Hunter Biden Meme Coin Is Down 98 % Since Launch . Here What Crypto Investors Need to Know .,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+71,341,Can BNB reclaim $780? THESE levels stand between Binance Coin and $1K,irrelevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+72,290,"Is Solana undervalued? SOL up 35% in Q3, but still trails Ethereum",relevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+73,87,Swiss graduate swaps robotics for a bike across African,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+74,119,Man pleads guilty to orchestrating $240 million bitcoin theft,irrelevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+75,284,"Crypto Prices Today: Why Bitcoin, XRP and Solana Are All Down Before the CLARITY Act Vote",relevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+76,233,Music in the Park in Florence tonight,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+77,347,"BNB Chain leads in 2026 RWA growth with $3.6B, but Solana tops in real crypto activity and trading volume.",relevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+78,337,"ETH, SOL, XRP May Gain More Than Bitcoin if US Senate Advances CLARITY Act",relevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+79,251,WWE Star Wants Her Father Band To Perform Her WrestleMania Entrance,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+80,117,"Oil heads for $100 , Asia stocks subdued as Middle East tensions escalate",irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+81,213,Stablecoin Summit 2026 by XREX Group Returns to Singapore as Stablecoins Mature Into a Financial Infrastructure,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+82,322,Solana Activates Transaction V1 Upgrade to Triple Data Capacity as LiquidChain Presale Nears $1M,relevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+83,361,"BNB Chain Shows Quantum Defense Works, Pays With 40% Throughput Drop",relevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+84,178,"Oil heads for $100 , Asia stocks subdued as West Asia tensions escalate",irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+85,356,BNB Chain leads 2026 real-world asset growth wi...,relevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+86,160,Alleged encroachment raises concern among indigenous communities in Parbatjhora,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+87,355,"Altcoin rally loses steam: Institutional bets fail to save Ethereum, Solana, and Aptos",relevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+88,295,Bank of Russia flags crypto and stablecoins as financial market risk,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+89,136,Bitcoin Reversal Risk Grows After Rejection Above $80K,relevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+90,167,Jim Cramer Prefers CoreWeave ( CRWV ) Over IREN ( IREN ),irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+91,20,"Bitmine Ethereum Holdings Near $15 Billion After Buying 28 , 086 More ETH",irrelevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+92,103,Who is Malone Lam ? Singaporean cybercrime ringleader pleads guilty to shocking crypto heist in US,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+93,139,Man pleads guilty to orchestrating $240 million bitcoin theft,irrelevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+94,166,Jim Cramer Prefers CoreWeave ( CRWV ) Over IREN ( IREN ),irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+95,1,Streaming Prices Are Rising More Than Cable Ever Did – 106 . 3 The Groove,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+96,270,We Asked Grok Whether XRP or Solana Reaches a New All-Time High First,irrelevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+97,314,Reform UK Lands £72M Crypto Windfall From Two Billionaire Donors,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+98,301,The founder of DeGods admits that leaving Solana for Ethereum was an awful mistake,irrelevant,relevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+99,68,Lumi Credits Trading Up 24 % Over Last 7 Days ( LUMI ),irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1
+100,252,Marbella shooting in broad daylight linked to suspected feud between European drug gangs,irrelevant,irrelevant,openai,gpt-5.6-luna,openai-evaluation-batch-v1

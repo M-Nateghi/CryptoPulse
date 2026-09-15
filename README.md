@@ -8,8 +8,9 @@ CryptoPulse is a production-style cryptocurrency data project that will combine
 news sentiment with market activity for Bitcoin (BTC), Ethereum (ETH), Solana
 (SOL), and BNB.
 
-Stages 1, 2, 4, and 5 are complete. The project currently collects recent
-cryptocurrency news metadata from
+All five implementation stages are complete. Stage 3 uses independent human
+relevance labels and explicitly identified AI-assisted sentiment labels. The
+project currently collects recent cryptocurrency news metadata from
 GDELT or Google News RSS and hourly OHLCV market data from Binance, validates the
 responses, and stores them in SQLite without creating duplicate records. It can
 also classify stored articles into validated, asset-specific sentiment records
@@ -35,6 +36,7 @@ in an interactive Streamlit dashboard.
 - Interactive sentiment, category-driver, story, price, and volatility views
 - A versioned, read-only demo snapshot for deployments without private data or keys
 - GitHub Actions checks for linting and the complete automated test suite
+- Human-grounded relevance evaluation plus VADER and FinBERT sentiment baselines
 
 ## Architecture
 
@@ -75,6 +77,11 @@ cryptopulse/
 |   `-- data_source.py      # Local database and demo fallback selection
 |-- demo/
 |   `-- export.py           # Sanitized, reproducible snapshot exporter
+|-- evaluation/
+|   |-- assisted_labels.py  # Provenance-rich AI-assisted label workflow
+|   |-- baselines.py        # VADER and FinBERT adapters
+|   |-- labels.py           # Human relevance validation
+|   `-- runner.py           # Metrics, confusion matrices, and error analysis
 |-- cli.py                  # Command-line entry point
 |-- config.py               # Environment-based settings
 |-- logging_config.py       # Application logging
@@ -100,6 +107,7 @@ tests/                      # Unit and integration tests
 demo/cryptopulse_demo.db    # Versioned, read-only deployment data
 streamlit_app.py            # Interactive analytics dashboard
 requirements.txt            # Pinned Python dependencies
+requirements-evaluation.txt # Optional local VADER and FinBERT dependencies
 .github/workflows/ci.yml    # Automated lint and test checks
 ```
 
@@ -192,14 +200,14 @@ source without changing the downstream article schema:
 python -m cryptopulse.cli ingest-news --source google-news --assets SOL BNB --timespan 7d --max-records 100
 ```
 
-Create the versioned human-labelling sheet after the database has sufficient
+Create the versioned human-relevance sheet after the database has sufficient
 coverage for every supported asset:
 
 ```powershell
 python -m cryptopulse.cli prepare-evaluation --size 100 --seed 42
 ```
 
-Follow `evaluation/LABELING_GUIDE.md` when completing
+Follow `evaluation/LABELING_GUIDE.md` and fill only `human_relevance` in
 `evaluation/labels_v1.csv`. The command refuses to overwrite an existing sheet.
 
 Validate the completed human labels before running any model evaluation:
@@ -207,6 +215,21 @@ Validate the completed human labels before running any model evaluation:
 ```powershell
 python -m cryptopulse.cli validate-evaluation
 ```
+
+Install the optional local baseline dependencies, generate traceable
+AI-assisted sentiment for human-relevant rows, and run the hybrid evaluation:
+
+```powershell
+python -m pip install -r requirements-evaluation.txt
+python -m cryptopulse.cli label-evaluation
+python -m cryptopulse.cli run-evaluation
+```
+
+The evaluation uses the independent human labels only for relevance. Assisted
+sentiment is stored separately with provider, model, prompt version, confidence,
+reason, and timestamp. Sentiment results for VADER and FinBERT are therefore
+reported as agreement with an AI-assisted reference, not as human-grounded
+accuracy.
 
 Start the local analytics dashboard:
 
@@ -315,9 +338,20 @@ and demo database are committed for the cloud build. Do not add a Streamlit
 secret unless a future deployed feature genuinely requires one.
 
 The current snapshot contains 672 hourly market rows, covering BTC, ETH, SOL,
-and BNB through 2026-09-09 19:00 UTC. It intentionally contains no sentiment
-results yet: Stage 3 must be completed with human labels before evaluated model
-outputs are promoted into the public demo.
+and BNB through 2026-09-09 19:00 UTC, plus 45 asset-level sentiment results for
+27 independently human-relevant headlines.
+
+### Evaluation results
+
+| Task | Reference | Model | Accuracy/agreement | Macro F1 |
+|---|---|---|---:|---:|
+| Relevance | Human | OpenAI `gpt-5.6-luna` | 79.0% | 77.6% |
+| Sentiment agreement | OpenAI-assisted | VADER 3.3.2 | 64.4% | 57.6% |
+| Sentiment agreement | OpenAI-assisted | ProsusAI/finbert | 57.8% | 54.0% |
+
+Only the relevance row is an accuracy result against independent human labels.
+The sentiment rows quantify model agreement and must not be interpreted as
+human-grounded accuracy.
 
 ## Roadmap
 
@@ -325,7 +359,7 @@ outputs are promoted into the public demo.
 |---|---|---|
 | 1 | Foundation, database, API clients, and ingestion | Complete |
 | 2 | Article cleaning and structured LLM sentiment | Complete |
-| 3 | Human-labelled evaluation set and model comparison | In progress |
+| 3 | Human relevance evaluation and assisted sentiment comparison | Complete |
 | 4 | Time-series analytics and Streamlit dashboard | Complete |
 | 5 | CI, deployment, and portfolio polish | Complete |
 

@@ -1,14 +1,14 @@
-# CryptoPulse Human Labelling Guide
+# CryptoPulse Human Relevance Labelling Guide
 
 ## Purpose
 
-This guide defines the human reference labels used to evaluate VADER, FinBERT,
-and the OpenAI classifier. These labels are ground truth for this project, so
-they must be based on your judgment rather than copied from a model.
+This file records the independent human reference used to evaluate whether the
+OpenAI classifier correctly identifies relevant cryptocurrency headlines. The
+asset sentiment and category task is AI-assisted and is stored separately in
+`ai_assisted_labels_v1.csv`.
 
-Label only what the headline itself supports. Do not open the article or use
-outside market knowledge. This keeps the human task aligned with the current
-classifier, which also receives only the headline.
+Label only what the headline itself supports. Do not open the article, search for
+outside context, or view model predictions before deciding.
 
 ## Supported assets
 
@@ -20,76 +20,45 @@ classifier, which also receives only the headline.
 A mention of the Binance exchange does not automatically mean the article
 affects BNB.
 
-## CSV fields
+## What to fill
 
 Do not change `sample_id`, `article_id`, `title`, or `published_at`.
 
-Fill `human_relevance` with one of:
+Fill only `human_relevance` with one of:
 
 - `relevant`: at least one supported asset is genuinely affected.
 - `irrelevant`: none of the supported assets is genuinely affected.
-- `review`: you cannot decide confidently and want to revisit the row.
 
-For each affected asset, fill its sentiment and category columns. Leave both
-columns blank when that asset is not affected.
-
-Allowed sentiment values:
-
-- `bullish`: the headline has a positive directional implication for the asset.
-- `neutral`: the implication is balanced, unclear, or purely descriptive.
-- `bearish`: the headline has a negative directional implication for the asset.
-
-Allowed categories:
-
-- `etf_flows`
-- `institutional_adoption`
-- `regulation`
-- `technology`
-- `security_hacks`
-- `market_movement`
-- `macro`
-- `exchange_activity`
-- `other`
-
-Use `human_notes` to explain ambiguity, mixed evidence, or a decision that may
-need discussion.
+Leave all asset sentiment and category columns blank. They remain in the stable
+template for backwards compatibility, but the project deliberately prevents AI
+outputs from being written into the human reference file. `human_notes` is
+optional and may record a difficult decision.
 
 ## Decision process
 
-1. Read the headline once without looking at any model output.
+1. Read the headline without looking at any model output.
 2. Decide whether BTC, ETH, SOL, or BNB is genuinely affected.
-3. If no supported asset is affected, enter `irrelevant` and leave all asset
-   fields blank.
-4. If one or more assets are affected, enter `relevant` and label each affected
-   asset independently.
-5. Choose the closest category for each affected asset.
-6. Use `review` and add a note when the headline does not provide enough evidence.
+3. Enter `relevant` or `irrelevant` in `human_relevance`.
+4. Add a human note only when useful.
 
 ## Important rules
 
-- Mention does not always mean impact. A list of token prices may be neutral.
+- Mention does not always mean impact. A list of token prices may still be relevant,
+  but its directional sentiment is a separate question.
 - General cryptocurrency news is not automatically relevant to every asset.
-- Label each asset independently in a multi-asset headline.
-- Judge likely directional impact, not whether the writing sounds emotional.
-- Do not infer facts that are absent from the headline.
-- Do not change earlier labels after seeing model predictions unless you record
-  and justify an adjudication.
+- Judge only the supported assets and only evidence present in the headline.
+- Do not change labels after seeing model predictions unless the change is recorded
+  as a separate adjudication.
 
-## Synthetic examples
+## Validation
 
-| Headline | Human decision |
-|---|---|
-| Bitcoin ETF inflows reach a new weekly high | BTC bullish, `etf_flows` |
-| Ethereum developers publish an upgrade schedule | ETH neutral, `technology` |
-| Solana network outage disrupts transactions | SOL bearish, `technology` |
-| BNB rises 8% after increased BNB Chain activity | BNB bullish, `market_movement` |
-| Major exchange publishes its annual report | Irrelevant unless a supported asset is clearly affected |
+Run:
 
-## Completion check
+```powershell
+python -m cryptopulse.cli validate-evaluation
+```
 
-Before the dataset is evaluated:
-
-- Every row must use `relevant` or `irrelevant`; no blank or `review` rows remain.
-- Relevant rows must contain at least one asset sentiment and category.
-- Irrelevant rows must have all asset fields blank.
-- Every sentiment and category must use the exact controlled spelling above.
+The completed file must contain only `relevant` or `irrelevant`, with no blank
+rows and no machine-generated asset labels. AI-assisted sentiment is generated
+separately with `label-evaluation` and records its provider, model, prompt
+version, confidence, reason, and generation time.

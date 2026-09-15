@@ -1,0 +1,57 @@
+sample_id,article_id,title,asset,task,model,reference,prediction
+5,304,Is BNB Binance Stock? No—Here’s the $10.9 Billion XRP Market-Cap Gap,,relevance,OpenAI (gpt-5.6-luna),irrelevant,relevant
+14,17,IonQ CEO Shares How Long It Will Take Quantum Computers To Hack Bitcoin Encryption . And Argues It Will Happen Sooner Than Expected,,relevance,OpenAI (gpt-5.6-luna),irrelevant,relevant
+15,358,"BNB, SOL, and Pepeto: Which Is the Next 100x Crypto Before the Listing Closes It?",,relevance,OpenAI (gpt-5.6-luna),irrelevant,relevant
+20,291,"What Is the Crypto Clarity Act? What Tuesday’s Senate Vote Decides for XRP, Bitcoin, Ethereum, and Solana",,relevance,OpenAI (gpt-5.6-luna),irrelevant,relevant
+31,339,"Ethereum, Solana, and Base control 92% of the e...",,relevance,OpenAI (gpt-5.6-luna),irrelevant,relevant
+32,110,Singaporean Malone Lam pleads guilty to orchestrating $300 million bitcoin theft from US resident,,relevance,OpenAI (gpt-5.6-luna),irrelevant,relevant
+33,182,Man pleads guilty to orchestrating $240 million bitcoin theft,,relevance,OpenAI (gpt-5.6-luna),irrelevant,relevant
+34,328,Solana Sees 2.35M SOL Flow To Exchanges As MVRV Ratio Hits Lowest Level Since May 2022,,relevance,OpenAI (gpt-5.6-luna),irrelevant,relevant
+39,365,GoMining Launches Digital Bitcoin Miners as Gifts for Crypto and Non-Crypto Users,,relevance,OpenAI (gpt-5.6-luna),irrelevant,relevant
+43,146,Man pleads guilty to orchestrating $240 million bitcoin theft,,relevance,OpenAI (gpt-5.6-luna),irrelevant,relevant
+47,189,Bitcoin Wave Analysis - ActionForex,,relevance,OpenAI (gpt-5.6-luna),irrelevant,relevant
+49,340,"'Long Way to Flip ETH,' Binance's CZ Reacts as BNB Chain Outperforms Solana in DeFi TVL",,relevance,OpenAI (gpt-5.6-luna),irrelevant,relevant
+58,313,Zcash leads crypto surge; BNB and Hyperliquid h...,,relevance,OpenAI (gpt-5.6-luna),irrelevant,relevant
+61,327,Can Solana overcome Pump.fun’s $7.88M selling? Answer may depend on…,,relevance,OpenAI (gpt-5.6-luna),irrelevant,relevant
+66,326,Upcoming Crypto Presales on BNB Chain: MemeToro’s Road to Testnet Deployment and Independent Review,,relevance,OpenAI (gpt-5.6-luna),irrelevant,relevant
+71,341,Can BNB reclaim $780? THESE levels stand between Binance Coin and $1K,,relevance,OpenAI (gpt-5.6-luna),irrelevant,relevant
+74,119,Man pleads guilty to orchestrating $240 million bitcoin theft,,relevance,OpenAI (gpt-5.6-luna),irrelevant,relevant
+91,20,"Bitmine Ethereum Holdings Near $15 Billion After Buying 28 , 086 More ETH",,relevance,OpenAI (gpt-5.6-luna),irrelevant,relevant
+93,139,Man pleads guilty to orchestrating $240 million bitcoin theft,,relevance,OpenAI (gpt-5.6-luna),irrelevant,relevant
+96,270,We Asked Grok Whether XRP or Solana Reaches a New All-Time High First,,relevance,OpenAI (gpt-5.6-luna),irrelevant,relevant
+98,301,The founder of DeGods admits that leaving Solana for Ethereum was an awful mistake,,relevance,OpenAI (gpt-5.6-luna),irrelevant,relevant
+3,296,"BNB Chain Overtakes Solana in DeFi TVL, Closing In on Ethereum's Lead",BNB,sentiment_agreement,VADER 3.3.2,bullish,neutral
+3,296,"BNB Chain Overtakes Solana in DeFi TVL, Closing In on Ethereum's Lead",SOL,sentiment_agreement,VADER 3.3.2,bearish,neutral
+11,227,Bitcoin ETF Outflows Reach $167M as Ether and Solana ETFs Rebound,BTC,sentiment_agreement,VADER 3.3.2,bearish,neutral
+11,227,Bitcoin ETF Outflows Reach $167M as Ether and Solana ETFs Rebound,ETH,sentiment_agreement,VADER 3.3.2,bullish,neutral
+11,227,Bitcoin ETF Outflows Reach $167M as Ether and Solana ETFs Rebound,SOL,sentiment_agreement,VADER 3.3.2,bullish,neutral
+28,94,Ethereum remains stuck in a tight range as US CPI looms . What are the key levels to watch ?,ETH,sentiment_agreement,VADER 3.3.2,neutral,bearish
+44,345,Solana price prediction: SOL defends $100 as bulls eye $107 breakout,SOL,sentiment_agreement,VADER 3.3.2,bullish,neutral
+45,159,Here Why Im Buying Ethereum Right Now,ETH,sentiment_agreement,VADER 3.3.2,bullish,neutral
+53,271,"Bitcoin, Solana, XRP Tumble Ahead Of CPI – And Retail Traders Aren’t Feeling Bullish",BTC,sentiment_agreement,VADER 3.3.2,bearish,bullish
+53,271,"Bitcoin, Solana, XRP Tumble Ahead Of CPI – And Retail Traders Aren’t Feeling Bullish",SOL,sentiment_agreement,VADER 3.3.2,bearish,bullish
+62,275,Crypto: Solana triples The Maximum Size of Its Transactions,SOL,sentiment_agreement,VADER 3.3.2,bullish,neutral
+72,290,"Is Solana undervalued? SOL up 35% in Q3, but still trails Ethereum",SOL,sentiment_agreement,VADER 3.3.2,bullish,neutral
+75,284,"Crypto Prices Today: Why Bitcoin, XRP and Solana Are All Down Before the CLARITY Act Vote",BTC,sentiment_agreement,VADER 3.3.2,bearish,bullish
+75,284,"Crypto Prices Today: Why Bitcoin, XRP and Solana Are All Down Before the CLARITY Act Vote",SOL,sentiment_agreement,VADER 3.3.2,bearish,bullish
+82,322,Solana Activates Transaction V1 Upgrade to Triple Data Capacity as LiquidChain Presale Nears $1M,SOL,sentiment_agreement,VADER 3.3.2,bullish,neutral
+83,361,"BNB Chain Shows Quantum Defense Works, Pays With 40% Throughput Drop",BNB,sentiment_agreement,VADER 3.3.2,neutral,bearish
+3,296,"BNB Chain Overtakes Solana in DeFi TVL, Closing In on Ethereum's Lead",SOL,sentiment_agreement,ProsusAI/finbert,bearish,bullish
+11,227,Bitcoin ETF Outflows Reach $167M as Ether and Solana ETFs Rebound,BTC,sentiment_agreement,ProsusAI/finbert,bearish,bullish
+17,219,"The SEC Cleared XRP , Bitcoin , Ethereum and Solana for Nasdaq Texas Commodity Trusts . What It Does and Does Not Do .",BTC,sentiment_agreement,ProsusAI/finbert,bullish,neutral
+17,219,"The SEC Cleared XRP , Bitcoin , Ethereum and Solana for Nasdaq Texas Commodity Trusts . What It Does and Does Not Do .",ETH,sentiment_agreement,ProsusAI/finbert,bullish,neutral
+17,219,"The SEC Cleared XRP , Bitcoin , Ethereum and Solana for Nasdaq Texas Commodity Trusts . What It Does and Does Not Do .",SOL,sentiment_agreement,ProsusAI/finbert,bullish,neutral
+26,363,Ethereum Wins Institutional Money. BNB Chain Gets Tokenized Stocks.,ETH,sentiment_agreement,ProsusAI/finbert,bullish,neutral
+26,363,Ethereum Wins Institutional Money. BNB Chain Gets Tokenized Stocks.,BNB,sentiment_agreement,ProsusAI/finbert,bullish,neutral
+42,274,"Treasury firms stack Ethereum, Solana, and Bitcoin through a jittery September market",ETH,sentiment_agreement,ProsusAI/finbert,bullish,bearish
+42,274,"Treasury firms stack Ethereum, Solana, and Bitcoin through a jittery September market",SOL,sentiment_agreement,ProsusAI/finbert,bullish,bearish
+42,274,"Treasury firms stack Ethereum, Solana, and Bitcoin through a jittery September market",BTC,sentiment_agreement,ProsusAI/finbert,bullish,bearish
+44,345,Solana price prediction: SOL defends $100 as bulls eye $107 breakout,SOL,sentiment_agreement,ProsusAI/finbert,bullish,neutral
+45,159,Here Why Im Buying Ethereum Right Now,ETH,sentiment_agreement,ProsusAI/finbert,bullish,neutral
+56,43,"XRP , Bitcoin , Ethereum and Solana Are All Up More Than 20 % in a Month and Still Down for the Year . Which Recovers First ?",BTC,sentiment_agreement,ProsusAI/finbert,neutral,bearish
+56,43,"XRP , Bitcoin , Ethereum and Solana Are All Up More Than 20 % in a Month and Still Down for the Year . Which Recovers First ?",ETH,sentiment_agreement,ProsusAI/finbert,neutral,bearish
+56,43,"XRP , Bitcoin , Ethereum and Solana Are All Up More Than 20 % in a Month and Still Down for the Year . Which Recovers First ?",SOL,sentiment_agreement,ProsusAI/finbert,neutral,bearish
+62,275,Crypto: Solana triples The Maximum Size of Its Transactions,SOL,sentiment_agreement,ProsusAI/finbert,bullish,neutral
+72,290,"Is Solana undervalued? SOL up 35% in Q3, but still trails Ethereum",ETH,sentiment_agreement,ProsusAI/finbert,neutral,bullish
+83,361,"BNB Chain Shows Quantum Defense Works, Pays With 40% Throughput Drop",BNB,sentiment_agreement,ProsusAI/finbert,neutral,bullish
+89,136,Bitcoin Reversal Risk Grows After Rejection Above $80K,BTC,sentiment_agreement,ProsusAI/finbert,bearish,bullish
