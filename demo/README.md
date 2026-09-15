@@ -6,14 +6,15 @@
 Regenerate it from the local database with:
 
 ```powershell
-python -m cryptopulse.cli export-demo --market-hours 168 --force
+python -m cryptopulse.cli export-demo --market-hours 168 --article-days 7 --force
 ```
 
-The export includes recent market candles and only the latest successful,
-relevant OpenAI classification for each article. The current sentiment records
-combine independent human relevance decisions with traceable OpenAI-assisted
-asset labels. The export excludes secrets, ingestion audits, fake-provider
-classifications, and the human-labelling sheet itself.
+The export includes recent market candles and seven days of the latest successful
+OpenAI classification state. Relevant and irrelevant decisions are retained for
+deduplication, while dashboard queries display relevant stories only. The current
+sentiment records combine independent human relevance decisions with traceable
+OpenAI-assisted asset labels. The export excludes secrets, ingestion audits,
+fake-provider classifications, and the human-labelling sheet itself.
 
 Before committing a refreshed snapshot, run:
 

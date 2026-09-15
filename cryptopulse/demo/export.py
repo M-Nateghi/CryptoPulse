@@ -1,7 +1,7 @@
 import os
 import sqlite3
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from cryptopulse.db.database import open_database
@@ -57,6 +57,7 @@ def _copy_market_rows(
 
 def _latest_production_classifications(
     source: sqlite3.Connection,
+    published_after: datetime,
 ) -> list[sqlite3.Row]:
     return source.execute(
         """
@@ -70,23 +71,29 @@ def _latest_production_classifications(
             FROM article_classifications AS c
             WHERE c.provider = 'openai'
               AND c.status = 'succeeded'
-              AND c.is_relevant = 1
         )
         SELECT
-            id, article_id, provider, model, prompt_version, input_text,
-            status, is_relevant, processed_at, error_message
-        FROM ranked_classifications
-        WHERE version_rank = 1
-        ORDER BY id
-        """
+            c.id, c.article_id, c.provider, c.model, c.prompt_version,
+            c.input_text, c.status, c.is_relevant, c.processed_at,
+            c.error_message
+        FROM ranked_classifications AS c
+        JOIN articles AS a ON a.id = c.article_id
+        WHERE c.version_rank = 1
+          AND a.published_at >= ?
+        ORDER BY c.id
+        """,
+        (
+            published_after.astimezone(UTC).isoformat().replace("+00:00", "Z"),
+        ),
     ).fetchall()
 
 
 def _copy_classification_rows(
     source: sqlite3.Connection,
     destination: sqlite3.Connection,
+    published_after: datetime,
 ) -> tuple[int, int, int]:
-    classifications = _latest_production_classifications(source)
+    classifications = _latest_production_classifications(source, published_after)
     if not classifications:
         return 0, 0, 0
 
@@ -181,6 +188,7 @@ def export_demo_database(
     source: sqlite3.Connection,
     output_path: Path,
     market_hours: int = 168,
+    article_days: int = 7,
     *,
     force: bool = False,
     generated_at: datetime | None = None,
@@ -188,6 +196,8 @@ def export_demo_database(
     """Create an atomic portfolio snapshot without ingestion audits or secrets."""
     if not 24 <= market_hours <= 1_000:
         raise ValueError("Demo market hours must be between 24 and 1000")
+    if not 1 <= article_days <= 30:
+        raise ValueError("Demo article days must be between 1 and 30")
     source_file = source.execute("PRAGMA database_list").fetchone()["file"]
     if source_file and Path(source_file).resolve() == output_path.resolve():
         raise ValueError("Demo output must be different from the source database")
@@ -198,13 +208,20 @@ def export_demo_database(
     temporary_path = output_path.with_name(f".{output_path.name}.tmp")
     temporary_path.unlink(missing_ok=True)
     exported_at = generated_at or datetime.now(UTC)
+    if exported_at.tzinfo is None or exported_at.utcoffset() is None:
+        raise ValueError("Demo generation time must include timezone information")
+    article_cutoff = exported_at - timedelta(days=article_days)
 
     try:
         with open_database(temporary_path) as destination:
             create_schema(destination)
             market_rows = _copy_market_rows(source, destination, market_hours)
             article_count, classification_count, sentiment_count = (
-                _copy_classification_rows(source, destination)
+                _copy_classification_rows(
+                    source,
+                    destination,
+                    article_cutoff,
+                )
             )
             data_through = (
                 max(row["candle_timestamp"] for row in market_rows)

@@ -93,6 +93,7 @@ def test_export_demo_keeps_recent_market_and_latest_production_result(tmp_path):
             source,
             output_path,
             market_hours=24,
+            article_days=30,
             generated_at=datetime(2026, 9, 15, tzinfo=UTC),
         )
 
@@ -112,6 +113,57 @@ def test_export_demo_keeps_recent_market_and_latest_production_result(tmp_path):
     assert prompt_version == "v2"
     assert oldest_market == "2026-09-01T06:00:00Z"
     assert metadata["generated_at"] == "2026-09-15T00:00:00Z"
+
+
+def test_export_demo_keeps_recent_irrelevant_classification_state(tmp_path):
+    source_path = tmp_path / "source.db"
+    output_path = tmp_path / "demo.db"
+    published_at = datetime(2026, 9, 14, tzinfo=UTC)
+    with open_database(source_path) as source:
+        create_schema(source)
+        insert_articles(
+            source,
+            [
+                Article(
+                    source="gdelt",
+                    external_id=None,
+                    title="Unrelated company announcement",
+                    url="https://example.com/unrelated",
+                    published_at=published_at,
+                    retrieved_at=published_at,
+                    raw_query="Bitcoin",
+                )
+            ],
+        )
+        article_id = source.execute("SELECT id FROM articles").fetchone()["id"]
+        save_classification_success(
+            source,
+            article_id,
+            ClassifierIdentity(
+                provider="openai",
+                model="test-model",
+                prompt_version="v1",
+            ),
+            "Unrelated company announcement",
+            ArticleClassification(is_relevant=False, asset_sentiments=[]),
+            published_at,
+        )
+        source.commit()
+        summary = export_demo_database(
+            source,
+            output_path,
+            generated_at=datetime(2026, 9, 15, tzinfo=UTC),
+        )
+
+    with open_readonly_database(output_path) as demo:
+        classification = demo.execute(
+            "SELECT is_relevant FROM article_classifications"
+        ).fetchone()
+
+    assert summary.article_rows == 1
+    assert summary.classification_rows == 1
+    assert summary.sentiment_rows == 0
+    assert classification["is_relevant"] == 0
 
 
 def test_export_demo_refuses_to_overwrite_by_default(tmp_path):

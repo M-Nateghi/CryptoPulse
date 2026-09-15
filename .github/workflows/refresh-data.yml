@@ -1,0 +1,75 @@
+name: Refresh data snapshot
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-data
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CRYPTOPULSE_DATABASE_PATH: data/cryptopulse.db
+      CRYPTOPULSE_OPENAI_API_KEY: ${{ secrets.CRYPTOPULSE_OPENAI_API_KEY }}
+      CRYPTOPULSE_OPENAI_MODEL: gpt-5.6-luna
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Restore working database from public snapshot
+        run: |
+          mkdir -p data
+          cp demo/cryptopulse_demo.db "$CRYPTOPULSE_DATABASE_PATH"
+
+      - name: Ingest market data
+        run: python -m cryptopulse.cli ingest-market
+
+      - name: Ingest recent news
+        run: >-
+          python -m cryptopulse.cli ingest-news
+          --source gdelt
+          --timespan 1d
+          --max-records 50
+
+      - name: Classify unseen news
+        run: python -m cryptopulse.cli classify-news --provider openai --limit 50
+
+      - name: Export safe public snapshot
+        run: >-
+          python -m cryptopulse.cli export-demo
+          --market-hours 168
+          --article-days 7
+          --force
+
+      - name: Audit snapshot for secret-shaped text
+        run: python scripts/audit_demo_secrets.py
+
+      - name: Commit refreshed snapshot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add demo/cryptopulse_demo.db
+          if git diff --cached --quiet; then
+            echo "Snapshot did not change."
+            exit 0
+          fi
+          git commit -m "data: refresh CryptoPulse snapshot"
+          git push

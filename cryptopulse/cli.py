@@ -86,6 +86,16 @@ def _demo_market_hours(value: str) -> int:
     return hours
 
 
+def _demo_article_days(value: str) -> int:
+    try:
+        days = int(value)
+    except ValueError as error:
+        raise argparse.ArgumentTypeError("article days must be an integer") from error
+    if not 1 <= days <= 30:
+        raise argparse.ArgumentTypeError("article days must be between 1 and 30")
+    return days
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="cryptopulse",
@@ -251,6 +261,12 @@ def build_parser() -> argparse.ArgumentParser:
         type=_demo_market_hours,
         default=168,
         help="Recent hourly candles retained per asset (24-1000, default: 168).",
+    )
+    demo_parser.add_argument(
+        "--article-days",
+        type=_demo_article_days,
+        default=7,
+        help="Recent processed headlines retained (1-30, default: 7).",
     )
     demo_parser.add_argument(
         "--force",
@@ -451,6 +467,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                     source=connection,
                     output_path=args.output,
                     market_hours=args.market_hours,
+                    article_days=args.article_days,
                     force=args.force,
                 )
                 LOGGER.info(

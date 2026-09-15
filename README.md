@@ -246,14 +246,16 @@ have been stored.
 Create or refresh the deployment snapshot from the local database:
 
 ```powershell
-python -m cryptopulse.cli export-demo --market-hours 168 --force
+python -m cryptopulse.cli export-demo --market-hours 168 --article-days 7 --force
 ```
 
-The exporter keeps only the requested recent market window and the latest
-successful, relevant OpenAI classification for each article. It writes to a
-temporary database first and replaces the tracked snapshot only after the export
-succeeds. Fake-provider results, API keys, run logs, and the human-labelling sheet
-are never copied into the demo database.
+The exporter keeps the requested recent market window and seven days of the
+latest successful OpenAI classification state. Retaining both relevant and
+irrelevant decisions prevents scheduled runs from paying to classify the same
+rejected headline again; dashboard queries still display relevant stories only.
+It writes to a temporary database first and replaces the tracked snapshot only
+after the export succeeds. Fake-provider results, API keys, run logs, and the
+human-labelling sheet are never copied into the demo database.
 
 ### Analytics formulas
 
@@ -316,13 +318,20 @@ test suite fast, repeatable, and independent of live API availability.
 Every push to `main` and every pull request runs Ruff and the full test suite in
 GitHub Actions with Python 3.13. No API keys are required by CI.
 
+A separate scheduled workflow refreshes the public data snapshot every six
+hours. It fetches recent Binance candles and GDELT headlines, classifies only
+headlines not already processed by the current model and prompt, audits the
+export for secret-shaped text, and commits the refreshed demo database. The
+workflow requires the repository secret `CRYPTOPULSE_OPENAI_API_KEY`. GitHub
+scheduled workflows use UTC and may begin a few minutes after the stated time.
+
 ## Deployment
 
 CryptoPulse is deployed on Streamlit Community Cloud as a public, read-only
 portfolio application at
 [m-nateghi-cryptopulse.streamlit.app](https://m-nateghi-cryptopulse.streamlit.app).
-The deployed app does not run ingestion or call OpenAI, so it does not need an
-API key.
+The deployed app does not run ingestion or call OpenAI. The API key is used only
+by the scheduled GitHub Actions runner and is never placed in Streamlit.
 
 Use these deployment settings:
 
@@ -337,9 +346,10 @@ The root `requirements.txt`, `.streamlit/config.toml`, application entry point,
 and demo database are committed for the cloud build. Do not add a Streamlit
 secret unless a future deployed feature genuinely requires one.
 
-The current snapshot contains 672 hourly market rows, covering BTC, ETH, SOL,
-and BNB through 2026-09-09 19:00 UTC, plus 45 asset-level sentiment results for
-27 independently human-relevant headlines.
+Snapshot size, data-through time, and story counts advance whenever the scheduled
+refresh publishes new data. The initial deployed snapshot contained 672 hourly
+market rows and 45 asset-level sentiment results for 27 independently
+human-relevant headlines.
 
 ### Evaluation results
 
