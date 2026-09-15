@@ -13,6 +13,7 @@ htmlcov/
 
 # Local secrets
 .env
+.streamlit/secrets.toml
 teach/
 
 # Local data and databases
@@ -20,3 +21,6 @@ data/
 *.db
 *.sqlite
 *.sqlite3
+
+# The intentionally exported portfolio snapshot is the only tracked database.
+!demo/cryptopulse_demo.db

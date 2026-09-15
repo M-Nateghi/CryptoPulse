@@ -1,15 +1,18 @@
 # CryptoPulse
 
+[![CI](https://github.com/M-Nateghi/CryptoPulse/actions/workflows/ci.yml/badge.svg)](https://github.com/M-Nateghi/CryptoPulse/actions/workflows/ci.yml)
+
 CryptoPulse is a production-style cryptocurrency data project that will combine
 news sentiment with market activity for Bitcoin (BTC), Ethereum (ETH), Solana
 (SOL), and BNB.
 
-Stages 1, 2, and 4 are complete. The project currently collects
-recent cryptocurrency news metadata from GDELT and hourly OHLCV market data from
-Binance, validates the responses, and stores them in SQLite without creating
-duplicate records. It can also classify stored articles into validated,
-asset-specific sentiment records with OpenAI Structured Outputs, calculate
-time-series features, and present them in an interactive Streamlit dashboard.
+Stages 1, 2, and 4 are complete, and the Stage 5 deployment foundation is in
+place. The project currently collects recent cryptocurrency news metadata from
+GDELT or Google News RSS and hourly OHLCV market data from Binance, validates the
+responses, and stores them in SQLite without creating duplicate records. It can
+also classify stored articles into validated, asset-specific sentiment records
+with OpenAI Structured Outputs, calculate time-series features, and present them
+in an interactive Streamlit dashboard.
 
 ## Current Features
 
@@ -28,6 +31,8 @@ time-series features, and present them in an interactive Streamlit dashboard.
 - Per-asset returns, rolling volatility, volume movement, and daily sentiment metrics
 - Streamlit dashboard with asset, date, sentiment, and news-category filters
 - Interactive sentiment, category-driver, story, price, and volatility views
+- A versioned, read-only demo snapshot for deployments without private data or keys
+- GitHub Actions checks for linting and the complete automated test suite
 
 ## Architecture
 
@@ -38,7 +43,7 @@ CLI command
 Configuration and logging
     |
     v
-Binance / GDELT API clients
+Binance / GDELT / Google News clients
     |
     v
 Validated Python models
@@ -48,6 +53,10 @@ Ingestion service
     |
     v
 SQLite repositories and database
+    |
+    +--> Reproducible read-only demo snapshot
+    |
+    `--> Streamlit analytics dashboard
 ```
 
 The layers are kept separate so that API access, validation, storage, and
@@ -60,6 +69,10 @@ cryptopulse/
 |-- analytics/
 |   |-- features.py         # Time-series features and aggregations
 |   `-- queries.py          # Dashboard database queries
+|-- dashboard/
+|   `-- data_source.py      # Local database and demo fallback selection
+|-- demo/
+|   `-- export.py           # Sanitized, reproducible snapshot exporter
 |-- cli.py                  # Command-line entry point
 |-- config.py               # Environment-based settings
 |-- logging_config.py       # Application logging
@@ -69,8 +82,9 @@ cryptopulse/
 |   |-- repositories.py     # Database reads and writes
 |   `-- schema.py           # Tables, constraints, and indexes
 |-- ingestion/
-    |-- binance.py          # Binance market-data client
-    |-- gdelt.py            # GDELT news client
+|   |-- binance.py          # Binance market-data client
+|   |-- gdelt.py            # GDELT news client
+|   |-- google_news.py      # Google News RSS fallback client
 |   `-- service.py          # Ingestion workflow coordination
 `-- sentiment/
     |-- cleaning.py         # Text normalization and asset candidates
@@ -81,12 +95,15 @@ cryptopulse/
     `-- service.py          # Bounded classification batch workflow
 
 tests/                      # Unit and integration tests
+demo/cryptopulse_demo.db    # Versioned, read-only deployment data
 streamlit_app.py            # Interactive analytics dashboard
 requirements.txt            # Pinned Python dependencies
+.github/workflows/ci.yml    # Automated lint and test checks
 ```
 
-Local databases, virtual environments, secrets, caches, and teaching notes are
-excluded from Git through `.gitignore`.
+Operational databases, virtual environments, secrets, caches, and teaching notes
+are excluded from Git through `.gitignore`. The generated demo snapshot is the
+single intentional database exception.
 
 ## Setup
 
@@ -195,9 +212,23 @@ Start the local analytics dashboard:
 python -m streamlit run streamlit_app.py
 ```
 
-The dashboard reads the same `data/cryptopulse.db` database as the CLI. Market
-views work as soon as candles exist; sentiment views remain explicitly empty
-until relevant OpenAI classifications have been stored.
+The dashboard uses `data/cryptopulse.db` when that local database exists. If it
+does not, it automatically falls back to the versioned, read-only
+`demo/cryptopulse_demo.db` snapshot. Market views work as soon as candles exist;
+sentiment views remain explicitly empty until relevant OpenAI classifications
+have been stored.
+
+Create or refresh the deployment snapshot from the local database:
+
+```powershell
+python -m cryptopulse.cli export-demo --market-hours 168 --force
+```
+
+The exporter keeps only the requested recent market window and the latest
+successful, relevant OpenAI classification for each article. It writes to a
+temporary database first and replaces the tracked snapshot only after the export
+succeeds. Fake-provider results, API keys, run logs, and the human-labelling sheet
+are never copied into the demo database.
 
 ### Analytics formulas
 
@@ -257,6 +288,33 @@ python -m ruff check .
 The tests use temporary databases and mocked HTTP responses, making the normal
 test suite fast, repeatable, and independent of live API availability.
 
+Every push to `main` and every pull request runs Ruff and the full test suite in
+GitHub Actions with Python 3.13. No API keys are required by CI.
+
+## Deployment
+
+CryptoPulse is prepared for Streamlit Community Cloud as a public, read-only
+portfolio application. The deployed app does not run ingestion or call OpenAI,
+so it does not need an API key.
+
+Use these deployment settings:
+
+| Setting | Value |
+|---|---|
+| Repository | `M-Nateghi/CryptoPulse` |
+| Branch | `main` |
+| Main file | `streamlit_app.py` |
+| Python version | `3.13` |
+
+The root `requirements.txt`, `.streamlit/config.toml`, application entry point,
+and demo database are committed for the cloud build. Do not add a Streamlit
+secret unless a future deployed feature genuinely requires one.
+
+The current snapshot contains 672 hourly market rows, covering BTC, ETH, SOL,
+and BNB through 2026-09-09 19:00 UTC. It intentionally contains no sentiment
+results yet: Stage 3 must be completed with human labels before evaluated model
+outputs are promoted into the public demo.
+
 ## Roadmap
 
 | Stage | Goal | Status |
@@ -265,7 +323,7 @@ test suite fast, repeatable, and independent of live API availability.
 | 2 | Article cleaning and structured LLM sentiment | Complete |
 | 3 | Human-labelled evaluation set and model comparison | In progress |
 | 4 | Time-series analytics and Streamlit dashboard | Complete |
-| 5 | CI, deployment, and portfolio polish | Planned |
+| 5 | CI, deployment, and portfolio polish | In progress |
 
 The finished application will compare asset-specific news sentiment with price,
 volume, returns, and volatility while distinguishing statistical association

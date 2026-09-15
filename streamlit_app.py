@@ -15,7 +15,8 @@ from cryptopulse.analytics import (
     load_sentiment_data,
 )
 from cryptopulse.config import Settings
-from cryptopulse.db.database import open_database
+from cryptopulse.dashboard import resolve_dashboard_database
+from cryptopulse.db.database import open_database, open_readonly_database
 from cryptopulse.db.schema import create_schema
 
 ASSETS = ("BTC", "ETH", "SOL", "BNB")
@@ -61,9 +62,14 @@ st.markdown(
 
 
 @st.cache_data(ttl=300, show_spinner=False)
-def load_dashboard_data(database_path: str) -> tuple[pd.DataFrame, pd.DataFrame]:
-    with open_database(Path(database_path)) as connection:
-        create_schema(connection)
+def load_dashboard_data(
+    database_path: str,
+    read_only: bool,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    database_context = open_readonly_database if read_only else open_database
+    with database_context(Path(database_path)) as connection:
+        if not read_only:
+            create_schema(connection)
         sentiment = load_sentiment_data(connection, provider="openai")
         market = load_market_data(connection)
     return sentiment, add_market_features(market)
@@ -353,7 +359,11 @@ def render_evaluation() -> None:
 
 
 settings = Settings()
-sentiment_data, market_data = load_dashboard_data(str(settings.database_path))
+dashboard_database = resolve_dashboard_database(settings.database_path)
+sentiment_data, market_data = load_dashboard_data(
+    str(dashboard_database.path),
+    dashboard_database.read_only,
+)
 minimum_date, maximum_date = date_bounds(sentiment_data, market_data)
 
 st.title("CryptoPulse AI")
@@ -362,8 +372,10 @@ latest_timestamp = (
     if not market_data.empty
     else "No market data"
 )
+data_mode = "Read-only demo snapshot" if dashboard_database.read_only else "Local data"
 st.markdown(
-    f'<div class="status-line">Market and news intelligence | Data through {latest_timestamp}</div>',
+    '<div class="status-line">Market and news intelligence | '
+    f'{data_mode} | Data through {latest_timestamp}</div>',
     unsafe_allow_html=True,
 )
 
@@ -406,7 +418,9 @@ selected_categories = st.sidebar.multiselect(
 if st.sidebar.button("Refresh data", width="stretch"):
     st.cache_data.clear()
     st.rerun()
-st.sidebar.caption("Dashboard sentiment uses OpenAI classifications only.")
+st.sidebar.caption(
+    f"Data mode: {data_mode}. Sentiment uses OpenAI classifications only."
+)
 
 filtered_market = filter_by_date(
     market_data[market_data["asset"].isin(selected_assets)],

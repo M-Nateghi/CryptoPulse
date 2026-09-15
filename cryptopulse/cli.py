@@ -10,6 +10,7 @@ from openai import OpenAI
 from cryptopulse.config import Settings
 from cryptopulse.db.database import open_database
 from cryptopulse.db.schema import create_schema
+from cryptopulse.demo import export_demo_database
 from cryptopulse.evaluation.labels import validate_labeling_csv
 from cryptopulse.evaluation.sampling import create_labeling_template
 from cryptopulse.ingestion.binance import BinanceClient
@@ -53,6 +54,16 @@ def _gdelt_max_records(value: str) -> int:
     if not 1 <= max_records <= 250:
         raise argparse.ArgumentTypeError("max records must be between 1 and 250")
     return max_records
+
+
+def _demo_market_hours(value: str) -> int:
+    try:
+        hours = int(value)
+    except ValueError as error:
+        raise argparse.ArgumentTypeError("market hours must be an integer") from error
+    if not 24 <= hours <= 1_000:
+        raise argparse.ArgumentTypeError("market hours must be between 24 and 1000")
+    return hours
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -138,6 +149,27 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=Path("evaluation/labels_v1.csv"),
         help="Human-labeling CSV (default: evaluation/labels_v1.csv).",
+    )
+    demo_parser = commands.add_parser(
+        "export-demo",
+        help="Export a safe read-only database snapshot for the public dashboard.",
+    )
+    demo_parser.add_argument(
+        "--output",
+        type=Path,
+        default=Path("demo/cryptopulse_demo.db"),
+        help="Destination SQLite snapshot (default: demo/cryptopulse_demo.db).",
+    )
+    demo_parser.add_argument(
+        "--market-hours",
+        type=_demo_market_hours,
+        default=168,
+        help="Recent hourly candles retained per asset (24-1000, default: 168).",
+    )
+    demo_parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Replace an existing demo snapshot.",
     )
     return parser
 
@@ -254,6 +286,24 @@ def main(argv: Sequence[str] | None = None) -> int:
                     summary.relevant,
                     summary.irrelevant,
                     summary.asset_labels,
+                )
+
+            if args.command == "export-demo":
+                summary = export_demo_database(
+                    source=connection,
+                    output_path=args.output,
+                    market_hours=args.market_hours,
+                    force=args.force,
+                )
+                LOGGER.info(
+                    "Demo snapshot: market=%d articles=%d classifications=%d "
+                    "sentiment=%d data_through=%s output=%s",
+                    summary.market_rows,
+                    summary.article_rows,
+                    summary.classification_rows,
+                    summary.sentiment_rows,
+                    summary.data_through or "none",
+                    summary.output_path,
                 )
     except (httpx.HTTPError, sqlite3.Error, OSError, RuntimeError, TypeError, ValueError) as error:
         LOGGER.error("Command %s failed: %s", args.command, error)
