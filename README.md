@@ -1,10 +1,11 @@
 # CryptoPulse
 
 [![CI](https://github.com/M-Nateghi/CryptoPulse/actions/workflows/ci.yml/badge.svg)](https://github.com/M-Nateghi/CryptoPulse/actions/workflows/ci.yml)
+[![Refresh data snapshot](https://github.com/M-Nateghi/CryptoPulse/actions/workflows/refresh-data.yml/badge.svg)](https://github.com/M-Nateghi/CryptoPulse/actions/workflows/refresh-data.yml)
 
 [Open the live CryptoPulse dashboard](https://m-nateghi-cryptopulse.streamlit.app)
 
-CryptoPulse is a production-style cryptocurrency data project that will combine
+CryptoPulse is a production-style cryptocurrency data project that combines
 news sentiment with market activity for Bitcoin (BTC), Ethereum (ETH), Solana
 (SOL), and BNB.
 
@@ -21,6 +22,7 @@ in an interactive Streamlit dashboard.
 
 - Public Binance ingestion for `BTCUSDT`, `ETHUSDT`, `SOLUSDT`, and `BNBUSDT`
 - Public GDELT news searches for BTC, ETH, SOL, and BNB
+- Google News RSS ingestion with automatic source fallback
 - Typed configuration through Pydantic settings
 - SQLite tables for articles, market candles, ingestion audits, and classifications
 - Idempotent inserts that safely skip previously stored data
@@ -36,6 +38,7 @@ in an interactive Streamlit dashboard.
 - Interactive sentiment, category-driver, story, price, and volatility views
 - A versioned, read-only demo snapshot for deployments without private data or keys
 - GitHub Actions checks for linting and the complete automated test suite
+- Six-hour GitHub Actions refreshes with bounded OpenAI usage and deduplication
 - Human-grounded relevance evaluation plus VADER and FinBERT sentiment baselines
 
 ## Architecture
@@ -109,6 +112,7 @@ streamlit_app.py            # Interactive analytics dashboard
 requirements.txt            # Pinned Python dependencies
 requirements-evaluation.txt # Optional local VADER and FinBERT dependencies
 .github/workflows/ci.yml    # Automated lint and test checks
+.github/workflows/refresh-data.yml # Six-hour data refresh and safe publishing
 ```
 
 Operational databases, virtual environments, secrets, caches, and teaching notes
@@ -326,6 +330,24 @@ audits the export for secret-shaped text, and commits the refreshed demo
 database. The workflow requires the repository secret
 `CRYPTOPULSE_OPENAI_API_KEY`. GitHub scheduled workflows use UTC and may begin a
 few minutes after the stated time.
+
+### Automated refresh schedule
+
+| Setting | Value |
+|---|---|
+| Frequency | Every 6 hours |
+| Scheduled times | 00:17, 06:17, 12:17, and 18:17 UTC |
+| Market source | Binance public API |
+| Primary news source | Google News RSS |
+| News fallback | GDELT DOC API |
+| OpenAI limit | At most 50 unseen headlines per run |
+| Deduplication window | 7 days of processed headline state |
+| Published artifact | `demo/cryptopulse_demo.db` |
+
+The workflow can also be started manually from the
+[Refresh data snapshot workflow](https://github.com/M-Nateghi/CryptoPulse/actions/workflows/refresh-data.yml).
+Successful runs commit only the sanitized demo database. Streamlit then
+redeploys from `main`; the public app itself never receives the OpenAI key.
 
 ## Deployment
 
