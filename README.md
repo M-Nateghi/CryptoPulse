@@ -2,12 +2,14 @@
 
 [![CI](https://github.com/M-Nateghi/CryptoPulse/actions/workflows/ci.yml/badge.svg)](https://github.com/M-Nateghi/CryptoPulse/actions/workflows/ci.yml)
 
+[Open the live CryptoPulse dashboard](https://m-nateghi-cryptopulse.streamlit.app)
+
 CryptoPulse is a production-style cryptocurrency data project that will combine
 news sentiment with market activity for Bitcoin (BTC), Ethereum (ETH), Solana
 (SOL), and BNB.
 
-Stages 1, 2, and 4 are complete, and the Stage 5 deployment foundation is in
-place. The project currently collects recent cryptocurrency news metadata from
+Stages 1, 2, 4, and 5 are complete. The project currently collects recent
+cryptocurrency news metadata from
 GDELT or Google News RSS and hourly OHLCV market data from Binance, validates the
 responses, and stores them in SQLite without creating duplicate records. It can
 also classify stored articles into validated, asset-specific sentiment records
@@ -293,9 +295,11 @@ GitHub Actions with Python 3.13. No API keys are required by CI.
 
 ## Deployment
 
-CryptoPulse is prepared for Streamlit Community Cloud as a public, read-only
-portfolio application. The deployed app does not run ingestion or call OpenAI,
-so it does not need an API key.
+CryptoPulse is deployed on Streamlit Community Cloud as a public, read-only
+portfolio application at
+[m-nateghi-cryptopulse.streamlit.app](https://m-nateghi-cryptopulse.streamlit.app).
+The deployed app does not run ingestion or call OpenAI, so it does not need an
+API key.
 
 Use these deployment settings:
 
@@ -323,7 +327,7 @@ outputs are promoted into the public demo.
 | 2 | Article cleaning and structured LLM sentiment | Complete |
 | 3 | Human-labelled evaluation set and model comparison | In progress |
 | 4 | Time-series analytics and Streamlit dashboard | Complete |
-| 5 | CI, deployment, and portfolio polish | In progress |
+| 5 | CI, deployment, and portfolio polish | Complete |
 
 The finished application will compare asset-specific news sentiment with price,
 volume, returns, and volatility while distinguishing statistical association
