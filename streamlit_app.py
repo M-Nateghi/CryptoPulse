@@ -20,6 +20,7 @@ from cryptopulse.db.database import open_database, open_readonly_database
 from cryptopulse.db.schema import create_schema
 
 ASSETS = ("BTC", "ETH", "SOL", "BNB")
+DASHBOARD_CACHE_VERSION = 2
 ASSET_COLORS = {
     "BTC": "#c87913",
     "ETH": "#2563a6",
@@ -65,7 +66,9 @@ st.markdown(
 def load_dashboard_data(
     database_path: str,
     read_only: bool,
+    cache_version: int,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
+    del cache_version  # Included in Streamlit's cache key for schema changes.
     database_context = open_readonly_database if read_only else open_database
     with database_context(Path(database_path)) as connection:
         if not read_only:
@@ -256,6 +259,8 @@ def render_stories(sentiment: pd.DataFrame) -> None:
         st.info("No classified stories match the current filters.")
         return
     stories = sentiment.sort_values("published_at", ascending=False).copy()
+    if "summary" not in stories.columns:
+        stories["summary"] = None
     stories["published_at"] = stories["published_at"].dt.strftime(
         "%Y-%m-%d %H:%M UTC"
     )
@@ -410,6 +415,7 @@ dashboard_database = resolve_dashboard_database(settings.database_path)
 sentiment_data, market_data = load_dashboard_data(
     str(dashboard_database.path),
     dashboard_database.read_only,
+    DASHBOARD_CACHE_VERSION,
 )
 minimum_date, maximum_date = date_bounds(sentiment_data, market_data)
 
