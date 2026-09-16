@@ -69,6 +69,33 @@ def test_insert_market_candles_is_safe_to_repeat(tmp_path):
     assert second_summary == InsertSummary(received=1, inserted=0, skipped=1)
 
 
+def test_duplicate_article_can_be_enriched_with_missing_summary(tmp_path):
+    published_at = datetime(2026, 9, 8, 10, tzinfo=UTC)
+    base = {
+        "source": "google_news",
+        "external_id": "story-guid",
+        "title": "Bitcoin market update",
+        "url": "https://example.com/story",
+        "published_at": published_at,
+        "retrieved_at": published_at,
+        "raw_query": "Bitcoin",
+    }
+    with open_database(tmp_path / "test.db") as connection:
+        create_schema(connection)
+        first = insert_articles(connection, [Article(**base)])
+        second = insert_articles(
+            connection,
+            [Article(**base, summary="Bitcoin trading volume increased.")],
+        )
+        stored_summary = connection.execute(
+            "SELECT summary FROM articles"
+        ).fetchone()["summary"]
+
+    assert first == InsertSummary(received=1, inserted=1, skipped=0)
+    assert second == InsertSummary(received=1, inserted=0, skipped=1)
+    assert stored_summary == "Bitcoin trading volume increased."
+
+
 def test_ingestion_run_can_be_started_and_finished(tmp_path):
     database_path = tmp_path / "test.db"
     started_at = datetime(2026, 9, 8, 10, tzinfo=UTC)

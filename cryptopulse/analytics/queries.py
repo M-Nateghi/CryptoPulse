@@ -8,8 +8,12 @@ def load_sentiment_data(
     provider: str = "openai",
 ) -> pd.DataFrame:
     """Load the latest successful classification for each article and provider."""
+    article_columns = {
+        row["name"] for row in connection.execute("PRAGMA table_info(articles)")
+    }
+    summary_select = "a.summary" if "summary" in article_columns else "NULL AS summary"
     frame = pd.read_sql_query(
-        """
+        f"""
         WITH ranked_classifications AS (
             SELECT
                 c.*,
@@ -24,6 +28,7 @@ def load_sentiment_data(
         SELECT
             a.id AS article_id,
             a.title,
+            {summary_select},
             a.url,
             a.published_at,
             c.provider,

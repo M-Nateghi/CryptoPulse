@@ -6,6 +6,7 @@ from html.parser import HTMLParser
 from cryptopulse.sentiment.models import CryptoAsset
 
 WHITESPACE_PATTERN = re.compile(r"\s+")
+MAX_SUMMARY_CHARACTERS = 1_500
 
 ASSET_NAME_PATTERNS = {
     CryptoAsset.BTC: re.compile(r"\bbitcoin\b", re.IGNORECASE),
@@ -31,8 +32,15 @@ class _TextExtractor(HTMLParser):
 
 @dataclass(frozen=True)
 class PreparedArticle:
-    text: str
+    title: str
     candidate_assets: tuple[CryptoAsset, ...]
+    summary: str | None = None
+
+    @property
+    def text(self) -> str:
+        if self.summary is None:
+            return self.title
+        return f"Headline: {self.title}\nSummary: {self.summary}"
 
 
 def clean_article_text(text: str) -> str:
@@ -73,10 +81,32 @@ def find_candidate_assets(text: str) -> tuple[CryptoAsset, ...]:
     return _find_candidates_in_clean_text(clean_article_text(text))
 
 
-def prepare_article_text(text: str) -> PreparedArticle:
-    """Clean article text and attach deterministic asset candidates."""
-    cleaned_text = clean_article_text(text)
+def _prepare_summary(summary: str | None, title: str) -> str | None:
+    if summary is None:
+        return None
+    if not isinstance(summary, str):
+        raise TypeError("Article summary must be a string or None")
+    try:
+        cleaned_summary = clean_article_text(summary)
+    except ValueError:
+        return None
+    if cleaned_summary.casefold() == title.casefold():
+        return None
+    if len(cleaned_summary) <= MAX_SUMMARY_CHARACTERS:
+        return cleaned_summary
+    shortened = cleaned_summary[:MAX_SUMMARY_CHARACTERS].rsplit(" ", 1)[0].strip()
+    return shortened or cleaned_summary[:MAX_SUMMARY_CHARACTERS]
+
+
+def prepare_article_text(title: str, summary: str | None = None) -> PreparedArticle:
+    """Clean an article headline and optional summary for classification."""
+    cleaned_title = clean_article_text(title)
+    cleaned_summary = _prepare_summary(summary, cleaned_title)
+    candidate_text = " ".join(
+        part for part in (cleaned_title, cleaned_summary) if part is not None
+    )
     return PreparedArticle(
-        text=cleaned_text,
-        candidate_assets=_find_candidates_in_clean_text(cleaned_text),
+        title=cleaned_title,
+        summary=cleaned_summary,
+        candidate_assets=_find_candidates_in_clean_text(candidate_text),
     )

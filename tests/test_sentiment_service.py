@@ -136,3 +136,40 @@ def test_failed_article_is_selected_again_on_next_run(tmp_path):
     assert summary.succeeded == 1
     assert retry_classifier.calls[0].candidate_assets == (CryptoAsset.BTC,)
     assert bitcoin_status == "succeeded"
+
+
+def test_batch_classification_uses_and_persists_optional_summary(tmp_path):
+    published_at = datetime(2026, 9, 9, 11, tzinfo=UTC)
+    with open_database(tmp_path / "test.db") as connection:
+        create_schema(connection)
+        insert_articles(
+            connection,
+            [
+                Article(
+                    source="google_news",
+                    external_id="summary-example",
+                    title="Network upgrade completed",
+                    summary="Ethereum validators adopted the new release.",
+                    url="https://example.com/summary",
+                    published_at=published_at,
+                    retrieved_at=published_at,
+                    raw_query="Ethereum",
+                )
+            ],
+        )
+        classifier = FakeSentimentClassifier()
+
+        summary = classify_articles(connection, classifier, limit=1)
+        stored_input = connection.execute(
+            "SELECT input_text FROM article_classifications"
+        ).fetchone()["input_text"]
+
+    assert summary.selected == 1
+    assert classifier.calls[0].summary == (
+        "Ethereum validators adopted the new release."
+    )
+    assert classifier.calls[0].candidate_assets == (CryptoAsset.ETH,)
+    assert stored_input == (
+        "Headline: Network upgrade completed\n"
+        "Summary: Ethereum validators adopted the new release."
+    )

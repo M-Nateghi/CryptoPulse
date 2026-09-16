@@ -24,6 +24,7 @@ from cryptopulse.evaluation.openai_predictions import OpenAIRelevancePredictor
 from cryptopulse.evaluation.runner import run_hybrid_evaluation
 from cryptopulse.evaluation.sampling import create_labeling_template
 from cryptopulse.ingestion.binance import BinanceClient
+from cryptopulse.ingestion.coindesk import CoinDeskRssClient
 from cryptopulse.ingestion.gdelt import ASSET_QUERIES, GdeltClient
 from cryptopulse.ingestion.google_news import GoogleNewsRssClient
 from cryptopulse.ingestion.service import ingest_market, ingest_news
@@ -108,7 +109,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     news_parser.add_argument(
         "--source",
-        choices=("gdelt", "google-news"),
+        choices=("gdelt", "google-news", "coindesk"),
         default="gdelt",
         help="News metadata source (default: gdelt).",
     )
@@ -297,21 +298,23 @@ def main(argv: Sequence[str] | None = None) -> int:
                 news_source = (
                     args.source if args.command == "ingest-news" else "gdelt"
                 )
-                news_base_url = (
-                    settings.google_news_base_url
-                    if news_source == "google-news"
-                    else settings.gdelt_base_url
-                )
+                if news_source == "google-news":
+                    news_base_url = settings.google_news_base_url
+                elif news_source == "coindesk":
+                    news_base_url = settings.coindesk_base_url
+                else:
+                    news_base_url = settings.gdelt_base_url
                 with httpx.Client(
                     base_url=news_base_url,
                     timeout=settings.gdelt_request_timeout_seconds,
                     headers={"User-Agent": USER_AGENT},
                 ) as http_client:
-                    news_client = (
-                        GoogleNewsRssClient(http_client)
-                        if news_source == "google-news"
-                        else GdeltClient(http_client)
-                    )
+                    if news_source == "google-news":
+                        news_client = GoogleNewsRssClient(http_client)
+                    elif news_source == "coindesk":
+                        news_client = CoinDeskRssClient(http_client)
+                    else:
+                        news_client = GdeltClient(http_client)
                     if args.command == "ingest-news":
                         ingest_news(
                             connection,

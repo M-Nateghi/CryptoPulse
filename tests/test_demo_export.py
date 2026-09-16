@@ -48,6 +48,7 @@ def _populate_source(database_path):
                     source="gdelt",
                     external_id=None,
                     title="Bitcoin ETF demand grows",
+                    summary="Fund inflows increased during the latest session.",
                     url="https://example.com/btc-etf",
                     published_at=start,
                     retrieved_at=start,
@@ -105,6 +106,9 @@ def test_export_demo_keeps_recent_market_and_latest_production_result(tmp_path):
             "SELECT MIN(candle_timestamp) FROM market_data"
         ).fetchone()[0]
         metadata = dict(demo.execute("SELECT key, value FROM demo_metadata"))
+        exported_summary = demo.execute(
+            "SELECT summary FROM articles"
+        ).fetchone()["summary"]
 
     assert summary.market_rows == 24
     assert summary.article_rows == 1
@@ -113,6 +117,7 @@ def test_export_demo_keeps_recent_market_and_latest_production_result(tmp_path):
     assert prompt_version == "v2"
     assert oldest_market == "2026-09-01T06:00:00Z"
     assert metadata["generated_at"] == "2026-09-15T00:00:00Z"
+    assert exported_summary == "Fund inflows increased during the latest session."
 
 
 def test_export_demo_keeps_recent_irrelevant_classification_state(tmp_path):

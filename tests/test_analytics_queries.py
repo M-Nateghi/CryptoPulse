@@ -54,6 +54,7 @@ def test_load_sentiment_data_selects_latest_success_for_provider(tmp_path):
                     source="gdelt",
                     external_id=None,
                     title="Bitcoin adoption grows",
+                    summary="A large institution announced a Bitcoin allocation.",
                     url="https://example.com/btc",
                     published_at=published_at,
                     retrieved_at=published_at,
@@ -97,6 +98,63 @@ def test_load_sentiment_data_selects_latest_success_for_provider(tmp_path):
 
     assert len(result) == 1
     assert result.iloc[0]["prompt_version"] == "v2"
+    assert result.iloc[0]["summary"] == (
+        "A large institution announced a Bitcoin allocation."
+    )
     assert result.iloc[0]["sentiment_score"] == 0.7
     assert str(result["published_at"].dtype) == "datetime64[us, UTC]"
     assert fake_result.empty
+
+
+def test_load_sentiment_data_supports_legacy_snapshot_without_summary(tmp_path):
+    published_at = datetime(2026, 9, 1, 10, tzinfo=UTC)
+    with open_database(tmp_path / "legacy.db") as connection:
+        create_schema(connection)
+        connection.execute("ALTER TABLE articles DROP COLUMN summary")
+        connection.execute(
+            """
+            INSERT INTO articles (
+                source, external_id, title, url, published_at, retrieved_at,
+                raw_query
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                "gdelt",
+                None,
+                "Bitcoin adoption grows",
+                "https://example.com/legacy-btc",
+                published_at.isoformat(),
+                published_at.isoformat(),
+                "Bitcoin",
+            ),
+        )
+        article_id = connection.execute("SELECT id FROM articles").fetchone()["id"]
+        save_classification_success(
+            connection,
+            article_id,
+            ClassifierIdentity(
+                provider="openai",
+                model="test-model",
+                prompt_version="v2",
+            ),
+            "Bitcoin adoption grows",
+            ArticleClassification(
+                is_relevant=True,
+                asset_sentiments=[
+                    AssetSentiment(
+                        asset="BTC",
+                        sentiment="bullish",
+                        sentiment_score=0.7,
+                        confidence=0.9,
+                        category="institutional_adoption",
+                        reason="Test evidence.",
+                    )
+                ],
+            ),
+            published_at,
+        )
+
+        result = load_sentiment_data(connection)
+
+    assert len(result) == 1
+    assert result.iloc[0]["summary"] is None

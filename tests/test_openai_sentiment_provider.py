@@ -19,7 +19,8 @@ from cryptopulse.sentiment.openai_provider import CLASSIFICATION_INSTRUCTIONS
 
 def _article():
     return PreparedArticle(
-        text="Bitcoin ETF demand rises",
+        title="Bitcoin ETF demand rises",
+        summary="Institutional funds recorded stronger inflows.",
         candidate_assets=(CryptoAsset.BTC,),
     )
 
@@ -58,7 +59,8 @@ def test_openai_classifier_uses_structured_output_contract():
     assert request["max_output_tokens"] == 1_000
     assert json.loads(request["input"]) == {
         "candidate_assets": ["BTC"],
-        "article_text": "Bitcoin ETF demand rises",
+        "headline": "Bitcoin ETF demand rises",
+        "summary": "Institutional funds recorded stronger inflows.",
     }
 
 
@@ -67,7 +69,7 @@ def test_openai_classifier_exposes_versioned_identity():
 
     assert classifier.identity.provider == "openai"
     assert classifier.identity.model == "custom-model"
-    assert classifier.identity.prompt_version == "openai-sentiment-v2"
+    assert classifier.identity.prompt_version == "openai-sentiment-v3"
 
 
 def test_openai_classifier_rejects_missing_parsed_output():
@@ -100,4 +102,4 @@ def test_prompt_defines_domain_rules_without_article_content():
     assert "etf_flows" in CLASSIFICATION_INSTRUCTIONS
     assert "BNB" in CLASSIFICATION_INSTRUCTIONS
     assert "untrusted content" in CLASSIFICATION_INSTRUCTIONS
-    assert _article().text not in CLASSIFICATION_INSTRUCTIONS
+    assert _article().title not in CLASSIFICATION_INSTRUCTIONS

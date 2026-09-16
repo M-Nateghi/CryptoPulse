@@ -7,9 +7,11 @@ import httpx
 
 from cryptopulse.db.models import Article
 from cryptopulse.ingestion.gdelt import ASSET_QUERY_TERMS
+from cryptopulse.sentiment.cleaning import clean_article_text
 
 SOURCE_NAME = "google_news"
 ALLOWED_TIMESPANS = {"1d", "3d", "7d"}
+SUMMARY_BOUNDARY_CHARACTERS = " -|:;"
 
 
 def _required_text(item: ElementTree.Element, field: str, index: int) -> str:
@@ -29,6 +31,31 @@ def _published_at(value: str, index: int) -> datetime:
     if parsed.tzinfo is None or parsed.utcoffset() is None:
         raise ValueError(f"Google News pubDate at index {index} has no timezone")
     return parsed.astimezone(UTC)
+
+
+def clean_rss_summary(
+    value: str | None,
+    *,
+    title: str,
+    publisher: str = "",
+) -> str | None:
+    """Return useful RSS description text or None for empty duplicates."""
+    if value is None:
+        return None
+    try:
+        cleaned = clean_article_text(value)
+    except ValueError:
+        return None
+
+    for prefix in (title, f"{title} - {publisher}" if publisher else ""):
+        if prefix and cleaned.casefold().startswith(prefix.casefold()):
+            cleaned = cleaned[len(prefix) :].lstrip(SUMMARY_BOUNDARY_CHARACTERS)
+            break
+    if publisher and cleaned.casefold().endswith(publisher.casefold()):
+        cleaned = cleaned[: -len(publisher)].rstrip(SUMMARY_BOUNDARY_CHARACTERS)
+    if not cleaned or cleaned.casefold() == title.casefold():
+        return None
+    return cleaned
 
 
 def parse_rss_articles(
@@ -53,6 +80,11 @@ def parse_rss_articles(
         publisher_suffix = f" - {publisher}"
         if publisher and title.endswith(publisher_suffix):
             title = title[: -len(publisher_suffix)].strip()
+        summary = clean_rss_summary(
+            item.findtext("description"),
+            title=title,
+            publisher=publisher,
+        )
 
         external_id = (item.findtext("guid") or link).strip()
         articles.append(
@@ -64,6 +96,7 @@ def parse_rss_articles(
                 published_at=_published_at(published, index),
                 retrieved_at=retrieved_at.astimezone(UTC),
                 raw_query=query,
+                summary=summary,
             )
         )
     return articles

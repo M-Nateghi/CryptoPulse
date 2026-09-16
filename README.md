@@ -9,20 +9,23 @@ CryptoPulse is a production-style cryptocurrency data project that combines
 news sentiment with market activity for Bitcoin (BTC), Ethereum (ETH), Solana
 (SOL), and BNB.
 
-All five implementation stages are complete. Stage 3 uses independent human
+All six implementation stages are complete. Stage 3 uses independent human
 relevance labels and explicitly identified AI-assisted sentiment labels. The
-project currently collects recent cryptocurrency news metadata from
-GDELT or Google News RSS and hourly OHLCV market data from Binance, validates the
-responses, and stores them in SQLite without creating duplicate records. It can
-also classify stored articles into validated, asset-specific sentiment records
-with OpenAI Structured Outputs, calculate time-series features, and present them
-in an interactive Streamlit dashboard.
+project currently collects recent cryptocurrency news metadata from GDELT,
+Google News RSS, and CoinDesk RSS plus hourly OHLCV market data from Binance,
+validates the responses, and stores them in SQLite without creating duplicate
+records. It can also clean useful RSS descriptions, classify headline-plus-summary inputs into
+validated asset-specific sentiment records with OpenAI Structured Outputs,
+calculate time-series features, and present them in an interactive Streamlit
+dashboard.
 
 ## Current Features
 
 - Public Binance ingestion for `BTCUSDT`, `ETHUSDT`, `SOLUSDT`, and `BNBUSDT`
 - Public GDELT news searches for BTC, ETH, SOL, and BNB
 - Google News RSS ingestion with automatic source fallback
+- Official CoinDesk RSS ingestion for genuine article descriptions
+- Optional cleaned RSS summaries with headline-only fallback
 - Typed configuration through Pydantic settings
 - SQLite tables for articles, market candles, ingestion audits, and classifications
 - Idempotent inserts that safely skip previously stored data
@@ -33,6 +36,7 @@ in an interactive Streamlit dashboard.
 - Strict Pydantic models for article relevance and asset-level sentiment
 - Provider-independent batch classification with failure tracking and safe retries
 - Real OpenAI classification plus a deterministic fake provider for offline testing
+- Versioned, bounded headline-plus-summary classification inputs
 - Per-asset returns, rolling volatility, volume movement, and daily sentiment metrics
 - Streamlit dashboard with asset, date, sentiment, and news-category filters
 - Interactive sentiment, category-driver, story, price, and volatility views
@@ -95,8 +99,9 @@ cryptopulse/
 |   `-- schema.py           # Tables, constraints, and indexes
 |-- ingestion/
 |   |-- binance.py          # Binance market-data client
+|   |-- coindesk.py         # Summary-bearing publisher RSS client
 |   |-- gdelt.py            # GDELT news client
-|   |-- google_news.py      # Google News RSS fallback client
+|   |-- google_news.py      # Google News RSS and summary parser
 |   `-- service.py          # Ingestion workflow coordination
 `-- sentiment/
     |-- cleaning.py         # Text normalization and asset candidates
@@ -191,6 +196,18 @@ Run real OpenAI classification after configuring the API key:
 python -m cryptopulse.cli classify-news --provider openai --limit 10
 ```
 
+Google News articles may include a cleaned RSS description. CryptoPulse stores
+that description as an optional summary and supplies it alongside the headline
+to the `openai-sentiment-v3` classifier. Empty descriptions, publisher markup,
+and descriptions that only repeat the headline are discarded. Summaries are
+limited to 1,500 characters, and articles without a useful summary continue
+through the original headline-only fallback.
+
+Google News descriptions currently tend to repeat the headline and publisher,
+so the scheduled workflow also ingests the official CoinDesk RSS feed as a
+summary-bearing source. CoinDesk ingestion is optional: if it is unavailable,
+the workflow continues with Google News or GDELT headline data.
+
 Collect additional news for selected assets when preparing evaluation coverage:
 
 ```powershell
@@ -233,7 +250,8 @@ The evaluation uses the independent human labels only for relevance. Assisted
 sentiment is stored separately with provider, model, prompt version, confidence,
 reason, and timestamp. Sentiment results for VADER and FinBERT are therefore
 reported as agreement with an AI-assisted reference, not as human-grounded
-accuracy.
+accuracy. These fixed Stage 3 metrics evaluated headline-only inputs; Stage 6
+does not claim an accuracy improvement until summary-aware evaluation is run.
 
 Start the local analytics dashboard:
 
@@ -396,6 +414,7 @@ human-grounded accuracy.
 | 3 | Human relevance evaluation and assisted sentiment comparison | Complete |
 | 4 | Time-series analytics and Streamlit dashboard | Complete |
 | 5 | CI, deployment, and portfolio polish | Complete |
+| 6 | RSS-enriched sentiment with safe headline-only fallback | Complete |
 
 The finished application will compare asset-specific news sentiment with price,
 volume, returns, and volatility while distinguishing statistical association
@@ -406,6 +425,7 @@ from unsupported causal claims.
 - [Binance public market data](https://developers.binance.com/docs/binance-spot-api-docs/rest-api/market-data-endpoints)
 - [GDELT DOC 2.0 API](https://blog.gdeltproject.org/gdelt-doc-2-0-api-debuts/)
 - [Google News RSS](https://news.google.com/rss)
+- [CoinDesk official RSS feed](https://www.coindesk.com/arc/outboundfeeds/rss/)
 
 CryptoPulse is an independent educational portfolio project and is not
 affiliated with Binance or GDELT. It does not provide financial advice.

@@ -48,7 +48,7 @@ def classify_articles(
     for article in articles:
         input_text = article.title
         try:
-            prepared = prepare_article_text(article.title)
+            prepared = prepare_article_text(article.title, article.summary)
             input_text = prepared.text
             classification = classifier.classify(prepared)
             if not isinstance(classification, ArticleClassification):

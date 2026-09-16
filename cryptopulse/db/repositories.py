@@ -29,6 +29,7 @@ def insert_articles(
             article.source,
             article.external_id,
             article.title,
+            article.summary,
             article.url,
             _utc_text(article.published_at),
             _utc_text(article.retrieved_at),
@@ -41,13 +42,36 @@ def insert_articles(
     connection.executemany(
         """
         INSERT INTO articles (
-            source, external_id, title, url, published_at, retrieved_at, raw_query
-        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            source, external_id, title, summary, url, published_at, retrieved_at,
+            raw_query
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT DO NOTHING
         """,
         rows,
     )
     inserted = connection.total_changes - changes_before
+    for article in article_list:
+        if article.summary is None:
+            continue
+        connection.execute(
+            """
+            UPDATE articles
+            SET summary = ?
+            WHERE source = ?
+              AND COALESCE(TRIM(summary), '') = ''
+              AND (
+                  (? IS NOT NULL AND external_id = ?)
+                  OR url = ?
+              )
+            """,
+            (
+                article.summary,
+                article.source,
+                article.external_id,
+                article.external_id,
+                article.url,
+            ),
+        )
     return InsertSummary(
         received=len(article_list),
         inserted=inserted,
@@ -320,7 +344,7 @@ def list_articles_for_classification(
 
     rows = connection.execute(
         """
-        SELECT a.id, a.title
+        SELECT a.id, a.title, a.summary
         FROM articles AS a
         LEFT JOIN article_classifications AS c
           ON c.article_id = a.id
@@ -339,6 +363,10 @@ def list_articles_for_classification(
         ),
     ).fetchall()
     return [
-        ArticleForClassification(id=row["id"], title=row["title"])
+        ArticleForClassification(
+            id=row["id"],
+            title=row["title"],
+            summary=row["summary"],
+        )
         for row in rows
     ]

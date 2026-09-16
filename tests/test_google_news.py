@@ -5,6 +5,7 @@ import pytest
 
 from cryptopulse.ingestion.google_news import (
     GoogleNewsRssClient,
+    clean_rss_summary,
     parse_rss_articles,
 )
 
@@ -17,6 +18,10 @@ RSS = b"""<?xml version="1.0" encoding="UTF-8"?>
       <guid isPermaLink="false">example-guid</guid>
       <pubDate>Mon, 14 Sep 2026 18:25:00 GMT</pubDate>
       <source url="https://example.com">Example News</source>
+      <description><![CDATA[
+        <a href="https://example.com">BNB Chain activity rises</a>
+        Network usage expanded during the latest reporting period. Example News
+      ]]></description>
     </item>
   </channel>
 </rss>
@@ -42,6 +47,10 @@ def test_parse_rss_articles_creates_canonical_article():
     assert articles[0].source == "google_news"
     assert articles[0].external_id == "example-guid"
     assert articles[0].title == "BNB Chain activity rises"
+    assert (
+        articles[0].summary
+        == "Network usage expanded during the latest reporting period."
+    )
     assert articles[0].published_at == datetime(2026, 9, 14, 18, 25, tzinfo=UTC)
     assert articles[0].retrieved_at == retrieved_at
 
@@ -67,3 +76,27 @@ def test_google_news_client_builds_query_and_honors_limit():
 def test_parse_rss_articles_rejects_invalid_xml():
     with pytest.raises(RuntimeError, match="invalid RSS XML"):
         parse_rss_articles(b"not xml", "BNB", datetime.now(UTC))
+
+
+def test_clean_rss_summary_discards_headline_and_publisher_only_description():
+    summary = clean_rss_summary(
+        "<a>Bitcoin market update</a> - Example News",
+        title="Bitcoin market update",
+        publisher="Example News",
+    )
+
+    assert summary is None
+
+
+def test_parse_rss_articles_allows_missing_description():
+    content = RSS.replace(
+        b"      <description><![CDATA[\n"
+        b"        <a href=\"https://example.com\">BNB Chain activity rises</a>\n"
+        b"        Network usage expanded during the latest reporting period. Example News\n"
+        b"      ]]></description>\n",
+        b"",
+    )
+
+    articles = parse_rss_articles(content, "BNB query", datetime.now(UTC))
+
+    assert articles[0].summary is None

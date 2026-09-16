@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS articles (
     source TEXT NOT NULL,
     external_id TEXT,
     title TEXT NOT NULL,
+    summary TEXT,
     url TEXT NOT NULL,
     published_at TEXT NOT NULL,
     retrieved_at TEXT NOT NULL,
@@ -176,9 +177,16 @@ def _asset_tables_support_bnb(connection: sqlite3.Connection) -> bool:
     return True
 
 
+def _articles_support_summary(connection: sqlite3.Connection) -> bool:
+    columns = connection.execute("PRAGMA table_info(articles)").fetchall()
+    return any(row["name"] == "summary" for row in columns)
+
+
 def create_schema(connection: sqlite3.Connection) -> None:
     """Create the current CryptoPulse database tables and indexes."""
     connection.executescript(SCHEMA_SQL)
+    if not _articles_support_summary(connection):
+        connection.execute("ALTER TABLE articles ADD COLUMN summary TEXT")
     if not _asset_tables_support_bnb(connection):
         try:
             connection.executescript(BNB_ASSET_MIGRATION_SQL)

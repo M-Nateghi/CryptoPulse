@@ -101,8 +101,8 @@ def _copy_classification_rows(
     article_placeholders = ", ".join("?" for _ in article_ids)
     articles = source.execute(
         f"""
-        SELECT id, source, external_id, title, url, published_at, retrieved_at,
-               raw_query
+        SELECT id, source, external_id, title, summary, url, published_at,
+               retrieved_at, raw_query
         FROM articles
         WHERE id IN ({article_placeholders})
         ORDER BY id
@@ -112,9 +112,9 @@ def _copy_classification_rows(
     destination.executemany(
         """
         INSERT INTO articles (
-            id, source, external_id, title, url, published_at, retrieved_at,
-            raw_query
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            id, source, external_id, title, summary, url, published_at,
+            retrieved_at, raw_query
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         [tuple(row) for row in articles],
     )

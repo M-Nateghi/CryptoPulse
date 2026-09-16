@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     binance_base_url: str = "https://data-api.binance.vision"
     gdelt_base_url: str = "https://api.gdeltproject.org"
     google_news_base_url: str = "https://news.google.com"
+    coindesk_base_url: str = "https://www.coindesk.com"
     request_timeout_seconds: float = Field(default=10.0, gt=0)
     gdelt_request_timeout_seconds: float = Field(default=45.0, gt=0)
     openai_api_key: SecretStr | None = None

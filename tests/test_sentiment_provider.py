@@ -73,7 +73,7 @@ def test_classifier_identity_rejects_unknown_fields():
 
 def test_protocol_accepts_any_object_with_the_required_shape():
     classifier = ExampleClassifier()
-    article = PreparedArticle(text="General market update", candidate_assets=())
+    article = PreparedArticle(title="General market update", candidate_assets=())
 
     assert isinstance(classifier, SentimentClassifier)
     assert classifier.identity.provider == "example"

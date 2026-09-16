@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CryptoPulse Stage 6 Pre-Work Guide</title>
+  <style>
+    :root {
+      --ink: #17212b;
+      --muted: #5b6672;
+      --line: #d7dee3;
+      --page: #f2f5f5;
+      --paper: #ffffff;
+      --green: #176f5b;
+      --green-soft: #e7f3ef;
+      --blue: #2d608e;
+      --blue-soft: #eaf2f8;
+      --gold: #97630f;
+      --gold-soft: #fff4dc;
+      --red: #a23e3e;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--page);
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      line-height: 1.62;
+    }
+    .page {
+      max-width: 980px;
+      margin: 28px auto 64px;
+      padding: 46px 54px 60px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 8px 28px rgba(22, 38, 46, 0.06);
+    }
+    h1, h2, h3 { line-height: 1.22; letter-spacing: 0; }
+    h1 { margin: 4px 0 12px; font-size: 40px; }
+    h2 {
+      margin: 46px 0 15px;
+      padding-top: 8px;
+      border-top: 3px solid var(--green);
+      font-size: 26px;
+    }
+    h3 { margin: 25px 0 8px; font-size: 19px; }
+    p { margin: 9px 0 15px; }
+    ul, ol { padding-left: 24px; }
+    li { margin: 7px 0; }
+    .eyebrow {
+      color: var(--green);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .subtitle { color: var(--muted); font-size: 19px; max-width: 760px; }
+    .meta { color: var(--muted); font-size: 13px; margin-top: 22px; }
+    .objective {
+      margin: 24px 0;
+      padding: 20px;
+      border-left: 5px solid var(--green);
+      background: var(--green-soft);
+    }
+    .callout {
+      margin: 18px 0;
+      padding: 15px 18px;
+      border-left: 4px solid var(--blue);
+      background: var(--blue-soft);
+    }
+    .callout.warning { border-color: var(--gold); background: var(--gold-soft); }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin: 19px 0;
+    }
+    .card {
+      padding: 17px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfc;
+    }
+    .card h3 { margin-top: 0; }
+    .diagram {
+      overflow-x: auto;
+      margin: 20px 0 28px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfc;
+    }
+    .diagram svg { display: block; width: 100%; min-width: 700px; height: auto; }
+    table { width: 100%; border-collapse: collapse; margin: 17px 0 25px; }
+    th, td { padding: 10px 12px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { background: #eef3f2; }
+    code {
+      padding: 2px 5px;
+      border-radius: 4px;
+      background: #eef1f3;
+      font-family: Consolas, monospace;
+      font-size: 0.92em;
+    }
+    .step {
+      display: grid;
+      grid-template-columns: 42px minmax(0, 1fr);
+      gap: 13px;
+      margin: 17px 0;
+    }
+    .number {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      color: white;
+      background: var(--green);
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+    }
+    .step h3 { margin: 4px 0 5px; }
+    .step p { margin-top: 0; }
+    .term { font-weight: 700; color: var(--green); }
+    .finish {
+      margin-top: 32px;
+      padding: 21px;
+      border: 2px solid var(--green);
+      border-radius: 8px;
+      background: var(--green-soft);
+    }
+    footer { margin-top: 42px; color: var(--muted); font-size: 13px; }
+    @media (max-width: 720px) {
+      .page { margin: 0; padding: 30px 21px 48px; border: 0; border-radius: 0; }
+      h1 { font-size: 33px; }
+      .grid { grid-template-columns: 1fr; }
+    }
+    @media print {
+      body { background: white; }
+      .page { max-width: none; margin: 0; padding: 0; border: 0; box-shadow: none; }
+      h2 { break-after: avoid; }
+      .card, .diagram, .callout, table { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <div class="eyebrow">CryptoPulse pre-work briefing</div>
+      <h1>Stage 6: RSS-Enriched Sentiment Analysis</h1>
+      <p class="subtitle">A beginner-friendly plan for giving the classifier more context than a headline, without introducing full-article scraping.</p>
+      <p class="meta">Prepared 16 September 2026 | Estimated reading time: 7 minutes</p>
+    </header>
+
+    <section>
+      <h2>1. Today's objective</h2>
+      <div class="objective">
+        <strong>Objective:</strong> extend CryptoPulse so each news item can carry a cleaned RSS summary, then classify the headline and summary together while preserving headline-only behavior when no useful summary is available.
+      </div>
+      <p>This stage improves the information supplied to OpenAI. It does not attempt to download complete articles, bypass paywalls, or scrape arbitrary websites. The scope stays deliberately small and reliable.</p>
+    </section>
+
+    <section>
+      <h2>2. Where we are in the project</h2>
+      <p>CryptoPulse already has an end-to-end production-style pipeline:</p>
+      <ol>
+        <li>Binance provides hourly market candles.</li>
+        <li>Google News RSS provides recent cryptocurrency headlines, with GDELT as fallback.</li>
+        <li>SQLite stores the normalized article and market records.</li>
+        <li>OpenAI classifies unseen headlines for relevance, asset sentiment, and category.</li>
+        <li>An exporter creates a safe public database snapshot.</li>
+        <li>Streamlit presents the analytics.</li>
+        <li>GitHub Actions repeats the refresh every six hours.</li>
+      </ol>
+      <p>The current classification input is the headline. Stage 6 changes the article data contract and the classification input, while leaving the rest of this architecture intact.</p>
+    </section>
+
+    <section>
+      <h2>3. What we are building and why</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>Current behavior</h3>
+          <p>A short headline is normalized, checked for candidate assets, and sent to the model. This is fast and inexpensive, but context can be incomplete.</p>
+        </div>
+        <div class="card">
+          <h3>Stage 6 behavior</h3>
+          <p>The headline remains primary evidence. A useful RSS description is cleaned, bounded, stored, and added as supporting context.</p>
+        </div>
+      </div>
+      <p>Headlines are often compressed or deliberately attention-grabbing. A summary may clarify who did what, which asset is actually affected, and whether the event is positive, negative, or merely descriptive.</p>
+      <div class="callout warning"><strong>Important limitation:</strong> RSS descriptions are not guaranteed to be useful. Some repeat the headline or contain publisher markup. Stage 6 must treat the summary as optional and fall back safely to headline-only classification.</div>
+    </section>
+
+    <section>
+      <h2>4. Architecture and mental model</h2>
+      <p>The new summary passes through the same layers as the headline: source parsing, validation, persistence, input preparation, classification, export, and display.</p>
+      <div class="diagram" role="img" aria-label="Stage 6 data flow">
+        <svg viewBox="0 0 900 330" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#53616d"/></marker>
+          </defs>
+          <g font-family="Segoe UI, Arial" text-anchor="middle">
+            <rect x="20" y="40" width="140" height="72" rx="7" fill="#eaf2f8" stroke="#2d608e"/>
+            <text x="90" y="69" font-size="15" font-weight="700">Google News RSS</text>
+            <text x="90" y="92" font-size="13" fill="#5b6672">title + description</text>
+            <rect x="205" y="40" width="140" height="72" rx="7" fill="#e7f3ef" stroke="#176f5b"/>
+            <text x="275" y="69" font-size="15" font-weight="700">RSS parser</text>
+            <text x="275" y="92" font-size="13" fill="#5b6672">extract fields</text>
+            <rect x="390" y="40" width="140" height="72" rx="7" fill="#fff4dc" stroke="#97630f"/>
+            <text x="460" y="69" font-size="15" font-weight="700">Summary cleaner</text>
+            <text x="460" y="92" font-size="13" fill="#5b6672">strip + validate</text>
+            <rect x="575" y="40" width="140" height="72" rx="7" fill="#eaf2f8" stroke="#2d608e"/>
+            <text x="645" y="69" font-size="15" font-weight="700">SQLite article</text>
+            <text x="645" y="92" font-size="13" fill="#5b6672">nullable summary</text>
+            <rect x="760" y="40" width="120" height="72" rx="7" fill="#e7f3ef" stroke="#176f5b"/>
+            <text x="820" y="69" font-size="15" font-weight="700">Input builder</text>
+            <text x="820" y="92" font-size="13" fill="#5b6672">bounded context</text>
+            <g stroke="#53616d" stroke-width="2" marker-end="url(#arrow)">
+              <line x1="160" y1="76" x2="197" y2="76"/><line x1="345" y1="76" x2="382" y2="76"/>
+              <line x1="530" y1="76" x2="567" y2="76"/><line x1="715" y1="76" x2="752" y2="76"/>
+            </g>
+            <rect x="575" y="205" width="140" height="72" rx="7" fill="#fff4dc" stroke="#97630f"/>
+            <text x="645" y="234" font-size="15" font-weight="700">OpenAI v3</text>
+            <text x="645" y="257" font-size="13" fill="#5b6672">structured output</text>
+            <rect x="390" y="205" width="140" height="72" rx="7" fill="#e7f3ef" stroke="#176f5b"/>
+            <text x="460" y="234" font-size="15" font-weight="700">Classification</text>
+            <text x="460" y="257" font-size="13" fill="#5b6672">sentiment + category</text>
+            <rect x="205" y="205" width="140" height="72" rx="7" fill="#eaf2f8" stroke="#2d608e"/>
+            <text x="275" y="234" font-size="15" font-weight="700">Safe snapshot</text>
+            <text x="275" y="257" font-size="13" fill="#5b6672">summary included</text>
+            <rect x="20" y="205" width="140" height="72" rx="7" fill="#e7f3ef" stroke="#176f5b"/>
+            <text x="90" y="234" font-size="15" font-weight="700">Streamlit</text>
+            <text x="90" y="257" font-size="13" fill="#5b6672">optional preview</text>
+            <path d="M820 112 V155 H645 V197" fill="none" stroke="#53616d" stroke-width="2" marker-end="url(#arrow)"/>
+            <line x1="575" y1="241" x2="538" y2="241" stroke="#53616d" stroke-width="2" marker-end="url(#arrow)"/>
+            <line x1="390" y1="241" x2="353" y2="241" stroke="#53616d" stroke-width="2" marker-end="url(#arrow)"/>
+            <line x1="205" y1="241" x2="168" y2="241" stroke="#53616d" stroke-width="2" marker-end="url(#arrow)"/>
+          </g>
+        </svg>
+      </div>
+      <p>The key mental model is <strong>progressive enrichment</strong>. Every article must have a headline. Some articles additionally have a useful summary. Downstream code works in both cases.</p>
+    </section>
+
+    <section>
+      <h2>5. Today's workflow</h2>
+      <div class="diagram" role="img" aria-label="Stage 6 implementation order">
+        <svg viewBox="0 0 900 225" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arrow2" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#53616d"/></marker>
+          </defs>
+          <g font-family="Segoe UI, Arial" font-size="13" text-anchor="middle">
+            <rect x="18" y="60" width="120" height="70" rx="7" fill="#eaf2f8" stroke="#2d608e"/>
+            <text x="78" y="89" font-weight="700">Define data</text><text x="78" y="110">contract</text>
+            <rect x="162" y="60" width="120" height="70" rx="7" fill="#e7f3ef" stroke="#176f5b"/>
+            <text x="222" y="89" font-weight="700">Migrate</text><text x="222" y="110">SQLite</text>
+            <rect x="306" y="60" width="120" height="70" rx="7" fill="#fff4dc" stroke="#97630f"/>
+            <text x="366" y="89" font-weight="700">Parse and</text><text x="366" y="110">clean RSS</text>
+            <rect x="450" y="60" width="120" height="70" rx="7" fill="#eaf2f8" stroke="#2d608e"/>
+            <text x="510" y="89" font-weight="700">Build bounded</text><text x="510" y="110">model input</text>
+            <rect x="594" y="60" width="120" height="70" rx="7" fill="#e7f3ef" stroke="#176f5b"/>
+            <text x="654" y="89" font-weight="700">Version and</text><text x="654" y="110">backfill</text>
+            <rect x="738" y="60" width="144" height="70" rx="7" fill="#eaf2f8" stroke="#2d608e"/>
+            <text x="810" y="89" font-weight="700">Test, publish,</text><text x="810" y="110">and verify</text>
+          </g>
+          <g stroke="#53616d" stroke-width="2" marker-end="url(#arrow2)">
+            <line x1="138" y1="95" x2="154" y2="95"/><line x1="282" y1="95" x2="298" y2="95"/>
+            <line x1="426" y1="95" x2="442" y2="95"/><line x1="570" y1="95" x2="586" y2="95"/>
+            <line x1="714" y1="95" x2="730" y2="95"/>
+          </g>
+          <text x="450" y="181" text-anchor="middle" font-family="Segoe UI, Arial" font-size="14" fill="#5b6672">Database and data-contract changes come before model and dashboard changes.</text>
+        </svg>
+      </div>
+    </section>
+
+    <section>
+      <h2>6. Explanation of each stage</h2>
+
+      <div class="step"><div class="number">1</div><div><h3>Define the article contract</h3><p>Add an optional summary to the canonical article model. Optional is essential because GDELT and some RSS items may not provide meaningful summary text.</p></div></div>
+
+      <div class="step"><div class="number">2</div><div><h3>Evolve the database safely</h3><p>Add a nullable <code>summary</code> column to existing SQLite databases. Existing rows remain valid with <code>NULL</code>, so deployment data and local data can be opened without destructive rebuilding.</p></div></div>
+
+      <div class="step"><div class="number">3</div><div><h3>Extract and clean RSS descriptions</h3><p>Read the RSS <code>&lt;description&gt;</code> field, decode HTML entities, remove markup, normalize whitespace, and reject descriptions that are empty or merely repeat the title. Cleaning belongs near ingestion because every downstream consumer should receive canonical text.</p></div></div>
+
+      <div class="step"><div class="number">4</div><div><h3>Build a bounded classification input</h3><p>Prepare a clearly labelled input containing the headline and, when useful, the summary. Apply a character limit so one malformed feed item cannot create an unexpectedly large API request.</p></div></div>
+
+      <div class="step"><div class="number">5</div><div><h3>Version the classifier</h3><p>Change the prompt version from the headline-only version to a new summary-aware version. The version is part of classification identity, so CryptoPulse can distinguish old outputs from new outputs instead of silently mixing two input methods.</p></div></div>
+
+      <div class="step"><div class="number">6</div><div><h3>Backfill deliberately</h3><p>Recent articles already have headline-only classifications. A new prompt version makes them eligible for reclassification. Because the scheduled job is capped at 50 articles, the backfill should be controlled and its API cost understood.</p></div></div>
+
+      <div class="step"><div class="number">7</div><div><h3>Carry summaries into the safe snapshot</h3><p>The exporter must include the nullable summary while continuing to exclude secrets, audit logs, and unnecessary working data. Streamlit may show the summary as supporting text, but headlines and links remain the primary interface.</p></div></div>
+
+      <div class="step"><div class="number">8</div><div><h3>Test and verify the complete path</h3><p>Tests should cover useful summaries, duplicate summaries, HTML markup, missing descriptions, old-database migration, headline-only fallback, input limits, deduplication, safe export, and dashboard rendering. After deployment, verify one real scheduled run and the public app.</p></div></div>
+    </section>
+
+    <section>
+      <h2>7. Important components and responsibilities</h2>
+      <table>
+        <thead><tr><th>Component</th><th>Stage 6 responsibility</th></tr></thead>
+        <tbody>
+          <tr><td>Article model</td><td>Represent <code>summary</code> as optional normalized text.</td></tr>
+          <tr><td>SQLite schema</td><td>Add the nullable column and migrate existing databases safely.</td></tr>
+          <tr><td>Google News RSS client</td><td>Extract description content alongside title, URL, and publication time.</td></tr>
+          <tr><td>Summary cleaner</td><td>Strip markup, normalize text, detect empty or duplicate content, and enforce limits.</td></tr>
+          <tr><td>Repository layer</td><td>Insert and retrieve the new field without breaking idempotent article storage.</td></tr>
+          <tr><td>Classification input preparation</td><td>Create a predictable headline-plus-summary payload with headline-only fallback.</td></tr>
+          <tr><td>OpenAI provider identity</td><td>Use a new prompt version to preserve provenance.</td></tr>
+          <tr><td>Demo exporter</td><td>Copy summaries into the sanitized public snapshot.</td></tr>
+          <tr><td>Streamlit dashboard</td><td>Optionally display summaries without overcrowding story views.</td></tr>
+          <tr><td>Tests and CI</td><td>Protect parsing, migration, classification, export, and presentation behavior.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>8. Important engineering concepts</h2>
+      <div class="grid">
+        <div class="card"><h3>Schema evolution</h3><p>Changing a persistent data structure while preserving existing records and compatibility.</p></div>
+        <div class="card"><h3>Backward compatibility</h3><p>Old articles with no summary continue to behave correctly.</p></div>
+        <div class="card"><h3>Progressive enrichment</h3><p>Optional information improves a record without becoming a requirement for the pipeline.</p></div>
+        <div class="card"><h3>Input normalization</h3><p>External text is converted into a stable internal form before storage and modelling.</p></div>
+        <div class="card"><h3>Model provenance</h3><p>Prompt version, model, provider, and input text explain how each output was produced.</p></div>
+        <div class="card"><h3>Bounded processing</h3><p>Text length and article-count limits keep cost and runtime predictable.</p></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>9. Standard professional approach</h2>
+      <p>A professional team usually handles this change in the following order:</p>
+      <ol>
+        <li>Write the new data contract and fallback behavior.</li>
+        <li>Create a backward-compatible database migration.</li>
+        <li>Normalize untrusted external content at the ingestion boundary.</li>
+        <li>Keep model inputs explicit, structured, and size-limited.</li>
+        <li>Version the changed model behavior.</li>
+        <li>Plan reprocessing cost before launching a backfill.</li>
+        <li>Test old and new records together.</li>
+        <li>Deploy, observe one production cycle, and compare outcomes.</li>
+      </ol>
+      <p>This order limits uncertainty. It ensures the storage layer understands the new field before the classifier or dashboard tries to use it.</p>
+    </section>
+
+    <section>
+      <h2>10. What I should understand before coding</h2>
+      <ul>
+        <li>A summary is <strong>optional context</strong>, not a replacement for the headline.</li>
+        <li>External RSS content is untrusted input and must be cleaned before use.</li>
+        <li>Database migrations preserve data; they are different from deleting and recreating a database.</li>
+        <li>Changing classification input changes model behavior, so the prompt version must change.</li>
+        <li>Reclassification is a backfill and has a measurable API cost.</li>
+        <li>The existing Stage 3 metrics describe the headline-only system. We should not claim Stage 6 improves accuracy until it is evaluated.</li>
+        <li>The six-hour workflow and read-only Streamlit architecture remain unchanged in principle.</li>
+      </ul>
+      <div class="callout"><strong>Recommended scope:</strong> implement summary storage and summary-aware classification first. Treat full-article extraction as a separate future stage because it introduces website-specific parsing, blocking, paywalls, and licensing concerns.</div>
+    </section>
+
+    <section>
+      <h2>11. Expected state at the end of today's work</h2>
+      <div class="finish">
+        <ul>
+          <li>New Google News records store a cleaned summary when one is genuinely useful.</li>
+          <li>Existing and GDELT records without summaries still work.</li>
+          <li>OpenAI receives a labelled, bounded headline-plus-summary input.</li>
+          <li>A new prompt version keeps the outputs traceable.</li>
+          <li>The public snapshot safely carries summaries.</li>
+          <li>The dashboard can present supporting context without changing its core workflow.</li>
+          <li>Automated tests cover migration, parsing, fallback, classification, export, and UI behavior.</li>
+          <li>The scheduled refresh and public deployment complete successfully.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <h2>12. Short glossary</h2>
+      <p><span class="term">Backfill:</span> processing existing records with a newly introduced rule, field, or model version.</p>
+      <p><span class="term">Data contract:</span> the agreed structure and meaning of data passed between components.</p>
+      <p><span class="term">HTML entity:</span> encoded text such as <code>&amp;amp;</code> that must be decoded into its displayed character.</p>
+      <p><span class="term">Nullable:</span> a database field that may contain no value.</p>
+      <p><span class="term">Normalization:</span> converting varied external input into a consistent internal representation.</p>
+      <p><span class="term">Prompt version:</span> an identifier recording which instructions and input method produced a model result.</p>
+      <p><span class="term">RSS:</span> a structured XML feed used by publishers and aggregators to distribute article metadata.</p>
+      <p><span class="term">Schema migration:</span> a controlled change to the structure of an existing database.</p>
+    </section>
+
+    <footer>This document is a pre-implementation learning guide. It describes the planned Stage 6 work and does not modify CryptoPulse application behavior.</footer>
+  </main>
+</body>
+</html>

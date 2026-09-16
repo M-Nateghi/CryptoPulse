@@ -73,6 +73,7 @@ def test_bnb_chain_name_is_detected_case_insensitively():
 def test_prepare_article_text_returns_clean_text_and_candidates():
     prepared = prepare_article_text(" <b>Solana</b>  upgrade &amp; BTC reaction ")
 
+    assert prepared.title == "Solana upgrade & BTC reaction"
     assert prepared.text == "Solana upgrade & BTC reaction"
     assert prepared.candidate_assets == (CryptoAsset.BTC, CryptoAsset.SOL)
 
@@ -81,3 +82,33 @@ def test_prepare_article_text_allows_no_candidate_asset():
     prepared = prepare_article_text("Streaming prices continue to rise")
 
     assert prepared.candidate_assets == ()
+
+
+def test_prepare_article_text_uses_clean_bounded_summary_for_candidates():
+    prepared = prepare_article_text(
+        "Market infrastructure update",
+        "<p>Ethereum validators completed an upgrade.</p>",
+    )
+
+    assert prepared.title == "Market infrastructure update"
+    assert prepared.summary == "Ethereum validators completed an upgrade."
+    assert prepared.text == (
+        "Headline: Market infrastructure update\n"
+        "Summary: Ethereum validators completed an upgrade."
+    )
+    assert prepared.candidate_assets == (CryptoAsset.ETH,)
+
+
+@pytest.mark.parametrize("summary", [None, "", "   ", "Same headline"])
+def test_prepare_article_text_falls_back_when_summary_is_not_useful(summary):
+    prepared = prepare_article_text("Same headline", summary)
+
+    assert prepared.summary is None
+    assert prepared.text == "Same headline"
+
+
+def test_prepare_article_text_limits_summary_length():
+    prepared = prepare_article_text("Bitcoin update", "word " * 400)
+
+    assert prepared.summary is not None
+    assert len(prepared.summary) <= 1_500

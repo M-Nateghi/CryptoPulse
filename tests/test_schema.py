@@ -111,6 +111,34 @@ def test_create_schema_migrates_existing_asset_tables_for_bnb(tmp_path):
     assert foreign_key_errors == []
 
 
+def test_create_schema_adds_optional_summary_to_existing_articles(tmp_path):
+    legacy_schema = SCHEMA_SQL.replace("    summary TEXT,\n", "")
+    with open_database(tmp_path / "legacy-summary.db") as connection:
+        connection.executescript(legacy_schema)
+        connection.execute(
+            """
+            INSERT INTO articles (
+                source, external_id, title, url, published_at, retrieved_at,
+                raw_query
+            ) VALUES ('gdelt', NULL, 'Bitcoin update',
+                      'https://example.com/bitcoin', '2026-09-08T10:00:00Z',
+                      '2026-09-08T11:00:00Z', 'Bitcoin')
+            """
+        )
+
+        create_schema(connection)
+
+        columns = {
+            row["name"] for row in connection.execute("PRAGMA table_info(articles)")
+        }
+        summary = connection.execute(
+            "SELECT summary FROM articles"
+        ).fetchone()["summary"]
+
+    assert "summary" in columns
+    assert summary is None
+
+
 def test_articles_reject_duplicate_source_url(tmp_path):
     database_path = tmp_path / "test.db"
     article = (

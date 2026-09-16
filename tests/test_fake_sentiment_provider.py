@@ -24,7 +24,7 @@ def test_fake_classifier_satisfies_provider_protocol():
 
 def test_fake_classifier_returns_irrelevant_for_no_candidates():
     classifier = FakeSentimentClassifier()
-    article = PreparedArticle(text="General market update", candidate_assets=())
+    article = PreparedArticle(title="General market update", candidate_assets=())
 
     result = classifier.classify(article)
 
@@ -37,7 +37,7 @@ def test_fake_classifier_returns_irrelevant_for_no_candidates():
 def test_fake_classifier_returns_neutral_results_for_candidates():
     classifier = FakeSentimentClassifier()
     article = PreparedArticle(
-        text="Bitcoin and Ethereum market update",
+        title="Bitcoin and Ethereum market update",
         candidate_assets=(CryptoAsset.BTC, CryptoAsset.ETH),
     )
 
@@ -59,7 +59,7 @@ def test_fake_classifier_returns_neutral_results_for_candidates():
 
 def test_fake_classifier_can_return_a_scripted_result():
     article = PreparedArticle(
-        text="Bitcoin ETF demand rises",
+        title="Bitcoin ETF demand rises",
         candidate_assets=(CryptoAsset.BTC,),
     )
     scripted = ArticleClassification(
@@ -85,7 +85,7 @@ def test_fake_classifier_can_return_a_scripted_result():
 
 def test_fake_classifier_can_raise_a_scripted_error():
     article = PreparedArticle(
-        text="Provider failure example",
+        title="Provider failure example",
         candidate_assets=(),
     )
     classifier = FakeSentimentClassifier(
@@ -98,8 +98,8 @@ def test_fake_classifier_can_raise_a_scripted_error():
 
 def test_fake_classifier_records_calls_in_order():
     classifier = FakeSentimentClassifier()
-    first = PreparedArticle(text="First article", candidate_assets=())
-    second = PreparedArticle(text="Second article", candidate_assets=())
+    first = PreparedArticle(title="First article", candidate_assets=())
+    second = PreparedArticle(title="Second article", candidate_assets=())
 
     classifier.classify(first)
     classifier.classify(second)

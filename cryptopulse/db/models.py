@@ -11,6 +11,7 @@ class Article:
     published_at: datetime
     retrieved_at: datetime
     raw_query: str
+    summary: str | None = None
 
 
 @dataclass(frozen=True)
@@ -38,3 +39,4 @@ class InsertSummary:
 class ArticleForClassification:
     id: int
     title: str
+    summary: str | None = None

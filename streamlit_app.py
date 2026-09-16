@@ -265,6 +265,7 @@ def render_stories(sentiment: pd.DataFrame) -> None:
             "published_at": "Published",
             "asset": "Asset",
             "title": "Headline",
+            "summary": "Summary",
             "sentiment": "Sentiment",
             "sentiment_score": "Score",
             "confidence": "Confidence",
@@ -278,6 +279,7 @@ def render_stories(sentiment: pd.DataFrame) -> None:
                 "Published",
                 "Asset",
                 "Headline",
+                "Summary",
                 "Sentiment",
                 "Score",
                 "Confidence",
@@ -357,7 +359,8 @@ def render_evaluation() -> None:
     metrics = pd.read_csv(metrics_path)
     st.caption(
         "Relevance is measured against independent human labels. Sentiment results "
-        "measure agreement with AI-assisted labels and are not human-grounded accuracy."
+        "measure agreement with AI-assisted labels and are not human-grounded accuracy. "
+        "This fixed Stage 3 benchmark used headline-only inputs."
     )
     display_metrics = metrics.copy()
     percentage_columns = (
@@ -463,8 +466,8 @@ if st.sidebar.button("Refresh data", width="stretch"):
     st.cache_data.clear()
     st.rerun()
 st.sidebar.caption(
-    f"Data mode: {data_mode}. Sentiment uses human relevance and "
-    "OpenAI-assisted asset labels."
+    f"Data mode: {data_mode}. Sentiment is model-generated from headlines and "
+    "available RSS summaries."
 )
 
 filtered_market = filter_by_date(

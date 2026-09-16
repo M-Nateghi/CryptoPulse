@@ -55,6 +55,15 @@ jobs:
               --max-records 50
           fi
 
+      - name: Ingest summary-enriched publisher RSS
+        run: |
+          if ! python -m cryptopulse.cli ingest-news \
+            --source coindesk \
+            --timespan 1d \
+            --max-records 50; then
+            echo "::warning::CoinDesk RSS unavailable; continuing with headline-only sources."
+          fi
+
       - name: Classify unseen news
         run: python -m cryptopulse.cli classify-news --provider openai --limit 50
 
