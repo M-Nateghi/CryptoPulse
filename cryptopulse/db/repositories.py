@@ -1,7 +1,10 @@
+import re
 import sqlite3
+import unicodedata
 from collections.abc import Iterable
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Literal
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from cryptopulse.db.models import (
     Article,
@@ -12,6 +15,12 @@ from cryptopulse.db.models import (
 from cryptopulse.sentiment.models import ArticleClassification
 from cryptopulse.sentiment.provider import ClassifierIdentity
 
+CROSS_SOURCE_DEDUP_WINDOW = timedelta(hours=72)
+NEAR_DUPLICATE_MIN_TOKENS = 5
+NEAR_DUPLICATE_TOKEN_OVERLAP = 0.85
+TITLE_TOKEN_PATTERN = re.compile(r"[a-z0-9]+")
+TRACKING_QUERY_KEYS = {"fbclid", "gclid", "ref", "source"}
+
 
 def _utc_text(value: datetime) -> str:
     if value.tzinfo is None or value.utcoffset() is None:
@@ -19,11 +28,187 @@ def _utc_text(value: datetime) -> str:
     return value.astimezone(UTC).isoformat().replace("+00:00", "Z")
 
 
+def _canonical_url(value: str) -> str:
+    parsed = urlsplit(value)
+    hostname = (parsed.hostname or "").casefold().removeprefix("www.")
+    if parsed.port is not None:
+        hostname = f"{hostname}:{parsed.port}"
+    query = urlencode(
+        sorted(
+            (key, item)
+            for key, item in parse_qsl(parsed.query, keep_blank_values=True)
+            if not key.casefold().startswith("utm_")
+            and key.casefold() not in TRACKING_QUERY_KEYS
+        )
+    )
+    path = parsed.path.rstrip("/") or "/"
+    return urlunsplit(("", hostname, path, query, ""))
+
+
+def _normalized_title_tokens(value: str) -> set[str]:
+    normalized = unicodedata.normalize("NFKC", value).casefold()
+    return set(TITLE_TOKEN_PATTERN.findall(normalized))
+
+
+def _titles_are_near_duplicates(left: str, right: str) -> bool:
+    return _title_token_sets_are_near_duplicates(
+        _normalized_title_tokens(left),
+        _normalized_title_tokens(right),
+    )
+
+
+def _title_token_sets_are_near_duplicates(
+    left_tokens: set[str],
+    right_tokens: set[str],
+) -> bool:
+    if left_tokens == right_tokens:
+        return True
+    if min(len(left_tokens), len(right_tokens)) < NEAR_DUPLICATE_MIN_TOKENS:
+        return False
+    overlap = len(left_tokens & right_tokens) / max(
+        len(left_tokens),
+        len(right_tokens),
+    )
+    return overlap >= NEAR_DUPLICATE_TOKEN_OVERLAP
+
+
+def _stored_datetime(value: str) -> datetime:
+    return datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(UTC)
+
+
+def _find_cross_source_duplicate(
+    article: Article,
+    stored_articles: list[sqlite3.Row],
+) -> sqlite3.Row | None:
+    article_url = _canonical_url(article.url)
+    if article.published_at.tzinfo is None or article.published_at.utcoffset() is None:
+        raise ValueError("Database timestamps must include timezone information")
+    published_at = article.published_at.astimezone(UTC)
+    for stored in stored_articles:
+        if stored["source"] == article.source:
+            continue
+        if _canonical_url(stored["url"]) == article_url:
+            return stored
+        published_distance = abs(
+            published_at - _stored_datetime(stored["published_at"])
+        )
+        if (
+            published_distance <= CROSS_SOURCE_DEDUP_WINDOW
+            and _titles_are_near_duplicates(article.title, stored["title"])
+        ):
+            return stored
+    return None
+
+
+def _article_survival_rank(article: sqlite3.Row) -> tuple[int, int, int]:
+    return (
+        int(article["successful_classifications"] > 0),
+        int(bool((article["summary"] or "").strip())),
+        -article["id"],
+    )
+
+
+def deduplicate_cross_source_articles(connection: sqlite3.Connection) -> int:
+    """Merge previously stored cross-source duplicates conservatively."""
+    stored_articles = connection.execute(
+        """
+        SELECT
+            a.id, a.source, a.title, a.summary, a.url, a.published_at,
+            COUNT(CASE WHEN c.status = 'succeeded' THEN 1 END)
+                AS successful_classifications
+        FROM articles AS a
+        LEFT JOIN article_classifications AS c ON c.article_id = a.id
+        GROUP BY a.id
+        ORDER BY a.published_at, a.id
+        """
+    ).fetchall()
+    parents = {article["id"]: article["id"] for article in stored_articles}
+    fingerprints = {
+        article["id"]: (
+            _canonical_url(article["url"]),
+            _normalized_title_tokens(article["title"]),
+            _stored_datetime(article["published_at"]),
+        )
+        for article in stored_articles
+    }
+
+    def find(article_id: int) -> int:
+        while parents[article_id] != article_id:
+            parents[article_id] = parents[parents[article_id]]
+            article_id = parents[article_id]
+        return article_id
+
+    def union(left_id: int, right_id: int) -> None:
+        left_root = find(left_id)
+        right_root = find(right_id)
+        if left_root != right_root:
+            parents[right_root] = left_root
+
+    for index, left in enumerate(stored_articles):
+        left_url, left_tokens, left_published = fingerprints[left["id"]]
+        for right in stored_articles[index + 1 :]:
+            if left["source"] == right["source"]:
+                continue
+            right_url, right_tokens, right_published = fingerprints[right["id"]]
+            if left_url == right_url or (
+                abs(left_published - right_published) <= CROSS_SOURCE_DEDUP_WINDOW
+                and _title_token_sets_are_near_duplicates(left_tokens, right_tokens)
+            ):
+                union(left["id"], right["id"])
+
+    groups: dict[int, list[sqlite3.Row]] = {}
+    for article in stored_articles:
+        groups.setdefault(find(article["id"]), []).append(article)
+
+    duplicates_removed = 0
+    for group in groups.values():
+        if len(group) == 1:
+            continue
+        keeper = max(group, key=_article_survival_rank)
+        if not (keeper["summary"] or "").strip():
+            richer_article = next(
+                (article for article in group if (article["summary"] or "").strip()),
+                None,
+            )
+            if richer_article is not None:
+                connection.execute(
+                    "UPDATE articles SET summary = ? WHERE id = ?",
+                    (richer_article["summary"], keeper["id"]),
+                )
+        for duplicate in group:
+            if duplicate["id"] == keeper["id"]:
+                continue
+            connection.execute(
+                "DELETE FROM articles WHERE id = ?",
+                (duplicate["id"],),
+            )
+            duplicates_removed += 1
+    return duplicates_removed
+
+
 def insert_articles(
     connection: sqlite3.Connection,
     articles: Iterable[Article],
 ) -> InsertSummary:
     article_list = list(articles)
+    stored_articles = connection.execute(
+        """
+        SELECT id, source, title, summary, url, published_at
+        FROM articles
+        """
+    ).fetchall()
+    articles_to_insert = []
+    for article in article_list:
+        duplicate = _find_cross_source_duplicate(article, stored_articles)
+        if duplicate is None:
+            articles_to_insert.append(article)
+            continue
+        if article.summary is not None and not (duplicate["summary"] or "").strip():
+            connection.execute(
+                "UPDATE articles SET summary = ? WHERE id = ?",
+                (article.summary, duplicate["id"]),
+            )
+
     rows = [
         (
             article.source,
@@ -35,7 +220,7 @@ def insert_articles(
             _utc_text(article.retrieved_at),
             article.raw_query,
         )
-        for article in article_list
+        for article in articles_to_insert
     ]
 
     changes_before = connection.total_changes
@@ -50,7 +235,7 @@ def insert_articles(
         rows,
     )
     inserted = connection.total_changes - changes_before
-    for article in article_list:
+    for article in articles_to_insert:
         if article.summary is None:
             continue
         connection.execute(

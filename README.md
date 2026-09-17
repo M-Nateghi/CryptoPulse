@@ -29,6 +29,8 @@ dashboard.
 - Typed configuration through Pydantic settings
 - SQLite tables for articles, market candles, ingestion audits, and classifications
 - Idempotent inserts that safely skip previously stored data
+- Cross-source deduplication using canonical URLs and conservative title overlap,
+  including cleanup of previously stored duplicates during news ingestion
 - UTC timestamps and structured application logging
 - Command-line interface for market, news, or combined ingestion
 - Mocked API tests that do not depend on live external services

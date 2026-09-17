@@ -6,6 +6,7 @@ from typing import Protocol
 
 from cryptopulse.db.models import Article, InsertSummary
 from cryptopulse.db.repositories import (
+    deduplicate_cross_source_articles,
     finish_ingestion_run,
     insert_articles,
     insert_market_candles,
@@ -125,6 +126,7 @@ def ingest_news(
                 timespan=timespan,
             )
             summary = insert_articles(connection, articles)
+            duplicates_removed = deduplicate_cross_source_articles(connection)
             connection.commit()
             total = _combine_summaries(total, summary)
             LOGGER.info(
@@ -134,6 +136,11 @@ def ingest_news(
                 summary.inserted,
                 summary.skipped,
             )
+            if duplicates_removed:
+                LOGGER.info(
+                    "Removed %d previously stored cross-source duplicates",
+                    duplicates_removed,
+                )
 
         finish_ingestion_run(
             connection=connection,

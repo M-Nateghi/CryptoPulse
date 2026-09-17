@@ -1,10 +1,11 @@
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 import pytest
 
 from cryptopulse.db.database import open_database
 from cryptopulse.db.models import Article, InsertSummary, MarketCandle
 from cryptopulse.db.repositories import (
+    deduplicate_cross_source_articles,
     finish_ingestion_run,
     insert_articles,
     insert_market_candles,
@@ -111,6 +112,151 @@ def test_duplicate_article_can_be_enriched_with_missing_summary(tmp_path):
     assert first == InsertSummary(received=1, inserted=1, skipped=0)
     assert second == InsertSummary(received=1, inserted=0, skipped=1)
     assert stored_summary == "Bitcoin trading volume increased."
+
+
+def test_cross_source_near_duplicate_is_skipped_and_enriches_summary(tmp_path):
+    published_at = datetime(2026, 9, 8, 10, tzinfo=UTC)
+    google_article = Article(
+        source="google_news",
+        external_id="google-guid",
+        title="Bitcoin ETF demand jumps as institutions return",
+        url="https://news.google.com/articles/google-guid",
+        published_at=published_at,
+        retrieved_at=published_at,
+        raw_query="Bitcoin",
+    )
+    coindesk_article = Article(
+        source="coindesk",
+        external_id="coindesk-guid",
+        title="Bitcoin ETF demand jumps as institutions return today",
+        summary="ETF issuers reported stronger institutional demand.",
+        url="https://www.coindesk.com/markets/bitcoin-etf-demand",
+        published_at=published_at + timedelta(hours=1),
+        retrieved_at=published_at + timedelta(hours=1),
+        raw_query="BTC",
+    )
+
+    with open_database(tmp_path / "test.db") as connection:
+        create_schema(connection)
+        first = insert_articles(connection, [google_article])
+        second = insert_articles(connection, [coindesk_article])
+        stored = connection.execute(
+            "SELECT source, summary FROM articles"
+        ).fetchall()
+
+    assert first == InsertSummary(received=1, inserted=1, skipped=0)
+    assert second == InsertSummary(received=1, inserted=0, skipped=1)
+    assert len(stored) == 1
+    assert stored[0]["source"] == "google_news"
+    assert stored[0]["summary"] == coindesk_article.summary
+
+
+def test_cross_source_canonical_url_duplicate_is_skipped(tmp_path):
+    published_at = datetime(2026, 9, 8, 10, tzinfo=UTC)
+    shared = {
+        "external_id": None,
+        "title": "Different syndication headlines",
+        "published_at": published_at,
+        "retrieved_at": published_at,
+        "raw_query": "Bitcoin",
+    }
+    with open_database(tmp_path / "test.db") as connection:
+        create_schema(connection)
+        insert_articles(
+            connection,
+            [
+                Article(
+                    source="gdelt",
+                    url="https://www.example.com/story/?utm_source=feed",
+                    **shared,
+                )
+            ],
+        )
+        summary = insert_articles(
+            connection,
+            [
+                Article(
+                    source="google_news",
+                    url="https://example.com/story?fbclid=tracking",
+                    **shared,
+                )
+            ],
+        )
+
+    assert summary == InsertSummary(received=1, inserted=0, skipped=1)
+
+
+def test_similar_cross_source_title_outside_window_is_kept(tmp_path):
+    published_at = datetime(2026, 9, 1, 10, tzinfo=UTC)
+    base = {
+        "external_id": None,
+        "title": "Bitcoin ETF demand jumps as institutions return",
+        "retrieved_at": published_at,
+        "raw_query": "Bitcoin",
+    }
+    with open_database(tmp_path / "test.db") as connection:
+        create_schema(connection)
+        insert_articles(
+            connection,
+            [
+                Article(
+                    source="google_news",
+                    url="https://example.com/first",
+                    published_at=published_at,
+                    **base,
+                )
+            ],
+        )
+        summary = insert_articles(
+            connection,
+            [
+                Article(
+                    source="coindesk",
+                    url="https://example.com/later",
+                    published_at=published_at + timedelta(days=4),
+                    **base,
+                )
+            ],
+        )
+
+    assert summary == InsertSummary(received=1, inserted=1, skipped=0)
+
+
+def test_existing_cross_source_duplicates_are_cleaned_safely(tmp_path):
+    published_at = datetime(2026, 9, 8, 10, tzinfo=UTC)
+    articles = [
+        Article(
+            source="google_news",
+            external_id="google-guid",
+            title="Ethereum upgrade receives final developer approval",
+            url="https://news.google.com/articles/ethereum-upgrade",
+            published_at=published_at,
+            retrieved_at=published_at,
+            raw_query="Ethereum",
+        ),
+        Article(
+            source="coindesk",
+            external_id="coindesk-guid",
+            title="Ethereum upgrade receives final developer approval today",
+            summary="Developers approved the network upgrade for deployment.",
+            url="https://www.coindesk.com/tech/ethereum-upgrade",
+            published_at=published_at + timedelta(hours=1),
+            retrieved_at=published_at + timedelta(hours=1),
+            raw_query="ETH",
+        ),
+    ]
+    with open_database(tmp_path / "test.db") as connection:
+        create_schema(connection)
+        insert_articles(connection, articles)
+        removed = deduplicate_cross_source_articles(connection)
+        stored = connection.execute(
+            "SELECT source, summary FROM articles"
+        ).fetchall()
+
+    assert removed == 1
+    assert len(stored) == 1
+    assert stored[0]["source"] == "coindesk"
+    assert stored[0]["summary"] == articles[1].summary
 
 
 def test_ingestion_run_can_be_started_and_finished(tmp_path):
