@@ -77,8 +77,8 @@ jobs:
       - name: Export safe public snapshot
         run: >-
           python -m cryptopulse.cli export-demo
-          --market-hours 168
-          --article-days 7
+          --market-hours 720
+          --article-days 30
           --force
 
       - name: Audit snapshot for secret-shaped text

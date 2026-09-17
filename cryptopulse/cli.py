@@ -260,14 +260,14 @@ def build_parser() -> argparse.ArgumentParser:
     demo_parser.add_argument(
         "--market-hours",
         type=_demo_market_hours,
-        default=168,
-        help="Recent hourly candles retained per asset (24-1000, default: 168).",
+        default=720,
+        help="Recent hourly candles retained per asset (24-1000, default: 720).",
     )
     demo_parser.add_argument(
         "--article-days",
         type=_demo_article_days,
-        default=7,
-        help="Recent processed headlines retained (1-30, default: 7).",
+        default=30,
+        help="Recent processed headlines retained (1-30, default: 30).",
     )
     demo_parser.add_argument(
         "--force",

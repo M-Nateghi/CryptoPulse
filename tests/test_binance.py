@@ -15,7 +15,7 @@ def test_binance_client_fetches_and_parses_hourly_candles():
         assert request.url.path == "/api/v3/klines"
         assert request.url.params["symbol"] == "BTCUSDT"
         assert request.url.params["interval"] == "1h"
-        assert request.url.params["limit"] == "168"
+        assert request.url.params["limit"] == "720"
         return httpx.Response(
             200,
             json=[

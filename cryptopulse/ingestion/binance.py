@@ -73,7 +73,7 @@ class BinanceClient:
     def fetch_hourly_candles(
         self,
         symbol: str,
-        limit: int = 168,
+        limit: int = 720,
     ) -> list[MarketCandle]:
         """Fetch recent hourly candles for one supported symbol."""
         if not 1 <= limit <= 1_000:

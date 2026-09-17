@@ -11,6 +11,7 @@ from cryptopulse.analytics import (
     aggregate_category_drivers,
     aggregate_sentiment,
     build_sentiment_market_history,
+    build_sentiment_price_correlation,
     load_market_data,
     load_sentiment_data,
 )
@@ -356,6 +357,197 @@ def render_market_analysis(
     st.plotly_chart(volatility, width="stretch")
 
 
+def render_sentiment_price_correlation(
+    selected_assets: list[str],
+    sentiment: pd.DataFrame,
+    market: pd.DataFrame,
+    start_date: object,
+    end_date: object,
+) -> None:
+    st.caption(
+        "Sentiment and price are aligned to fixed six-hour UTC periods. The "
+        "seven-day rolling correlation requires at least 10 valid observations."
+    )
+    if sentiment.empty:
+        st.info("No classified stories match the current filters.")
+        return
+    if market.empty:
+        st.info("No market observations are available for correlation analysis.")
+        return
+
+    timing_labels = {
+        "same_6h": "Same 6-hour period",
+        "next_6h": "Following 6 hours",
+        "next_24h": "Following 24 hours",
+    }
+    timing = st.selectbox(
+        "Price comparison",
+        list(timing_labels),
+        index=1,
+        format_func=timing_labels.get,
+        key="correlation_timing",
+    )
+    correlation = build_sentiment_price_correlation(
+        sentiment,
+        market,
+        timing=timing,
+    )
+    visible = filter_by_date(
+        correlation,
+        "period_end",
+        start_date,
+        end_date,
+    )
+    if visible.empty:
+        st.info("No completed six-hour periods match the current filters.")
+        return
+
+    st.subheader("Seven-day rolling correlation")
+    correlation_history = visible.dropna(subset=["rolling_correlation"])
+    if correlation_history.empty:
+        st.info(
+            "At least 10 aligned observations are needed before a rolling "
+            "correlation can be shown."
+        )
+    else:
+        history_figure = px.line(
+            correlation_history,
+            x="period_end",
+            y="rolling_correlation",
+            color="asset",
+            color_discrete_map=ASSET_COLORS,
+            labels={
+                "period_end": "Period ending",
+                "rolling_correlation": "Rolling Spearman correlation",
+                "asset": "Asset",
+            },
+        )
+        history_figure.add_hline(y=0, line_color="#8b9691")
+        history_figure.update_yaxes(range=[-1, 1])
+        history_figure.update_layout(
+            template="simple_white", hovermode="x unified", height=420
+        )
+        st.plotly_chart(history_figure, width="stretch")
+
+    available_assets = [
+        asset for asset in selected_assets if asset in set(visible["asset"])
+    ]
+    if not available_assets:
+        st.info("No selected asset has completed correlation periods.")
+        return
+    detail_asset = st.selectbox(
+        "Coin details",
+        available_assets,
+        key="correlation_asset",
+    )
+    asset_history = visible[visible["asset"].eq(detail_asset)].sort_values(
+        "period_end"
+    )
+    latest_pair_rows = asset_history.dropna(
+        subset=["sentiment_change", "price_change_pct"]
+    )
+
+    metric_columns = st.columns(3)
+    latest_period = asset_history.iloc[-1]
+    if pd.isna(latest_period["rolling_correlation"]):
+        metric_columns[0].metric("Current 7-day correlation", "Insufficient data")
+    else:
+        metric_columns[0].metric(
+            "Current 7-day correlation",
+            f"{latest_period['rolling_correlation']:+.2f}",
+        )
+    metric_columns[1].metric(
+        "Aligned observations",
+        f"{int(latest_period['rolling_observations'])} / 28",
+    )
+    if latest_pair_rows.empty:
+        metric_columns[2].metric("Latest price change", "No data")
+    else:
+        latest_pair = latest_pair_rows.iloc[-1]
+        metric_columns[2].metric(
+            "Latest price change",
+            f"{latest_pair['price_change_pct']:+.2f}%",
+            delta=f"{latest_pair['sentiment_change']:+.1f} sentiment points",
+        )
+
+    paired = asset_history.dropna(
+        subset=["sentiment_change", "price_change_pct"]
+    )
+    if paired.empty:
+        st.info("No aligned sentiment and price changes are available for this coin.")
+        return
+
+    comparison_figure = make_subplots(specs=[[{"secondary_y": True}]])
+    comparison_figure.add_trace(
+        go.Bar(
+            x=paired["period_end"],
+            y=paired["sentiment_change"],
+            name="Sentiment change",
+            marker_color="#16794f",
+            opacity=0.72,
+        ),
+        secondary_y=False,
+    )
+    comparison_figure.add_trace(
+        go.Scatter(
+            x=paired["period_end"],
+            y=paired["price_change_pct"],
+            name="Price change",
+            mode="lines+markers",
+            line={"color": ASSET_COLORS[detail_asset], "width": 2},
+        ),
+        secondary_y=True,
+    )
+    comparison_figure.add_hline(y=0, line_color="#8b9691")
+    comparison_figure.update_yaxes(
+        title_text="Sentiment change (points)", secondary_y=False
+    )
+    comparison_figure.update_yaxes(
+        title_text="Price change (%)", secondary_y=True
+    )
+    comparison_figure.update_layout(
+        template="simple_white", hovermode="x unified", height=440
+    )
+    st.plotly_chart(comparison_figure, width="stretch")
+
+    st.subheader("Period record")
+    records = asset_history.rename(
+        columns={
+            "period_end": "Period ending",
+            "story_count": "Stories",
+            "sentiment_score_0_100": "Sentiment score",
+            "sentiment_change": "Sentiment change",
+            "price_change_pct": "Price change (%)",
+            "rolling_observations": "Rolling observations",
+            "rolling_correlation": "7-day correlation",
+        }
+    )
+    records["Period ending"] = records["Period ending"].dt.strftime(
+        "%Y-%m-%d %H:%M UTC"
+    )
+    st.dataframe(
+        records[
+            [
+                "Period ending",
+                "Stories",
+                "Sentiment score",
+                "Sentiment change",
+                "Price change (%)",
+                "Rolling observations",
+                "7-day correlation",
+            ]
+        ],
+        hide_index=True,
+        width="stretch",
+        column_config={
+            "Sentiment score": st.column_config.NumberColumn(format="%.1f"),
+            "Sentiment change": st.column_config.NumberColumn(format="%+.1f"),
+            "Price change (%)": st.column_config.NumberColumn(format="%+.2f"),
+            "7-day correlation": st.column_config.NumberColumn(format="%+.2f"),
+        },
+    )
+
+
 def render_evaluation() -> None:
     metrics_path = Path("evaluation/model_metrics.csv")
     if not metrics_path.exists():
@@ -499,13 +691,22 @@ combined_history = build_sentiment_market_history(
     filtered_market,
 )
 
-overview_tab, history_tab, drivers_tab, stories_tab, market_tab, evaluation_tab = st.tabs(
+(
+    overview_tab,
+    history_tab,
+    drivers_tab,
+    stories_tab,
+    market_tab,
+    correlation_tab,
+    evaluation_tab,
+) = st.tabs(
     [
         "Overview",
         "Sentiment history",
         "News drivers",
         "Recent stories",
         "Market analysis",
+        "Sentiment-price correlation",
         "Model evaluation",
     ]
 )
@@ -519,6 +720,19 @@ with stories_tab:
     render_stories(filtered_sentiment)
 with market_tab:
     render_market_analysis(selected_assets, filtered_market, combined_history)
+with correlation_tab:
+    correlation_sentiment = sentiment_data[
+        sentiment_data["asset"].isin(selected_assets)
+        & sentiment_data["sentiment"].isin(selected_sentiments)
+        & sentiment_data["category"].isin(selected_categories)
+    ]
+    render_sentiment_price_correlation(
+        selected_assets,
+        correlation_sentiment,
+        market_data[market_data["asset"].isin(selected_assets)],
+        start_date,
+        end_date,
+    )
 with evaluation_tab:
     render_evaluation()
 

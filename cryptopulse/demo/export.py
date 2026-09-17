@@ -187,8 +187,8 @@ def _write_metadata(
 def export_demo_database(
     source: sqlite3.Connection,
     output_path: Path,
-    market_hours: int = 168,
-    article_days: int = 7,
+    market_hours: int = 720,
+    article_days: int = 30,
     *,
     force: bool = False,
     generated_at: datetime | None = None,

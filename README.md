@@ -42,6 +42,7 @@ dashboard.
 - Per-asset returns, rolling volatility, volume movement, and daily sentiment metrics
 - Streamlit dashboard with asset, date, sentiment, and news-category filters
 - Interactive sentiment, category-driver, story, price, and volatility views
+- Rolling sentiment-price correlation using fixed six-hour UTC periods
 - A versioned, read-only demo snapshot for deployments without private data or keys
 - GitHub Actions checks for linting and the complete automated test suite
 - Six-hour GitHub Actions refreshes with bounded OpenAI usage and deduplication
@@ -270,10 +271,10 @@ have been stored.
 Create or refresh the deployment snapshot from the local database:
 
 ```powershell
-python -m cryptopulse.cli export-demo --market-hours 168 --article-days 7 --force
+python -m cryptopulse.cli export-demo --market-hours 720 --article-days 30 --force
 ```
 
-The exporter keeps the requested recent market window and seven days of the
+The exporter keeps the requested recent market window and 30 days of the
 latest successful OpenAI classification state. Retaining both relevant and
 irrelevant decisions prevents scheduled runs from paying to classify the same
 rejected headline again; dashboard queries still display relevant stories only.
@@ -298,6 +299,20 @@ change, rolling 24-hour volatility, volume change, and a rolling volume z-score.
 All calculations use UTC. Rolling market features use only the current and earlier
 candles, while daily sentiment and market values are presented as same-period
 associations rather than causal evidence.
+
+### Sentiment-price correlation
+
+The dashboard's **Sentiment-price correlation** tab places sentiment and market
+data into fixed six-hour UTC periods. Sentiment change is the difference between
+adjacent confidence-weighted sentiment scores. Missing sentiment periods remain
+missing rather than being carried forward across a time gap.
+
+Price movement can be compared with sentiment during the same six-hour period,
+the following six hours, or the following 24 hours. For each asset, the dashboard
+calculates a seven-day rolling Spearman correlation from up to 28 aligned periods
+and requires at least 10 valid observations. It displays the current value, its
+observation count, its history, and the underlying period records. Correlation is
+an exploratory association and does not establish causation or profitability.
 
 The default provider is `openai`. The limit must be between 1 and 200 to keep
 each run bounded. Fake classifications are for development and testing only and
@@ -364,6 +379,7 @@ few minutes after the stated time.
 | News fallback | GDELT DOC API |
 | OpenAI limit | At most 100 unseen articles per scheduled run |
 | Deduplication window | 7 days of processed headline state |
+| Dashboard retention | 30 days of hourly prices and classified news |
 | Published artifact | `demo/cryptopulse_demo.db` |
 
 The workflow can also be started manually from the
@@ -419,6 +435,7 @@ human-grounded accuracy.
 | 4 | Time-series analytics and Streamlit dashboard | Complete |
 | 5 | CI, deployment, and portfolio polish | Complete |
 | 6 | RSS-enriched sentiment with safe headline-only fallback | Complete |
+| 7 | Rolling sentiment-price correlation dashboard | Complete |
 
 The finished application will compare asset-specific news sentiment with price,
 volume, returns, and volatility while distinguishing statistical association
