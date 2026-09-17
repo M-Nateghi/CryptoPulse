@@ -297,7 +297,7 @@ All calculations use UTC. Rolling market features use only the current and earli
 candles, while daily sentiment and market values are presented as same-period
 associations rather than causal evidence.
 
-The default provider is `openai`. The limit must be between 1 and 100 to keep
+The default provider is `openai`. The limit must be between 1 and 200 to keep
 each run bounded. Fake classifications are for development and testing only and
 must not be presented as analytical results.
 
@@ -341,8 +341,9 @@ Every push to `main` and every pull request runs Ruff and the full test suite in
 GitHub Actions with Python 3.13. No API keys are required by CI.
 
 A separate scheduled workflow refreshes the public data snapshot every six
-hours. It fetches recent Binance candles and Google News RSS headlines,
-automatically falling back to GDELT when Google News is unavailable. It
+hours. It fetches recent Binance candles and runs a separate Google News RSS
+search for each supported asset so BTC cannot consume the whole news allowance,
+automatically falling back to GDELT when a Google News search is unavailable. It
 classifies only headlines not already processed by the current model and prompt,
 audits the export for secret-shaped text, and commits the refreshed demo
 database. The workflow requires the repository secret
@@ -357,8 +358,9 @@ few minutes after the stated time.
 | Scheduled times | 00:17, 06:17, 12:17, and 18:17 UTC |
 | Market source | Binance public API |
 | Primary news source | Google News RSS |
+| Google News allowance | Up to 50 articles per asset per run |
 | News fallback | GDELT DOC API |
-| OpenAI limit | At most 50 unseen headlines per run |
+| OpenAI limit | At most 100 unseen articles per scheduled run |
 | Deduplication window | 7 days of processed headline state |
 | Published artifact | `demo/cryptopulse_demo.db` |
 

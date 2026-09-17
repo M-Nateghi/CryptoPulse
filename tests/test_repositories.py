@@ -1,14 +1,31 @@
 from datetime import UTC, datetime
 
+import pytest
+
 from cryptopulse.db.database import open_database
 from cryptopulse.db.models import Article, InsertSummary, MarketCandle
 from cryptopulse.db.repositories import (
     finish_ingestion_run,
     insert_articles,
     insert_market_candles,
+    list_articles_for_classification,
     start_ingestion_run,
 )
 from cryptopulse.db.schema import create_schema
+from cryptopulse.sentiment import ClassifierIdentity
+
+
+def test_classification_query_allows_200_but_rejects_larger_batches(tmp_path):
+    identity = ClassifierIdentity(
+        provider="openai",
+        model="test-model",
+        prompt_version="test-prompt",
+    )
+    with open_database(tmp_path / "test.db") as connection:
+        create_schema(connection)
+        assert list_articles_for_classification(connection, identity, 200) == []
+        with pytest.raises(ValueError, match="between 1 and 200"):
+            list_articles_for_classification(connection, identity, 201)
 
 
 def test_insert_articles_reports_and_skips_duplicate_urls(tmp_path):

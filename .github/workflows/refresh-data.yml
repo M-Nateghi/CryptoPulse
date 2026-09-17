@@ -42,17 +42,24 @@ jobs:
       - name: Ingest market data
         run: python -m cryptopulse.cli ingest-market
 
-      - name: Ingest recent news
+      - name: Ingest balanced recent news
         run: |
-          if ! python -m cryptopulse.cli ingest-news \
-            --source google-news \
-            --timespan 1d \
-            --max-records 50; then
-            echo "Google News unavailable; using GDELT fallback."
+          google_failed=0
+          for asset in BTC ETH SOL BNB; do
+            if ! python -m cryptopulse.cli ingest-news \
+              --source google-news \
+              --assets "$asset" \
+              --timespan 1d \
+              --max-records 50; then
+              google_failed=1
+            fi
+          done
+          if [ "$google_failed" -ne 0 ]; then
+            echo "One or more Google News searches failed; using GDELT fallback."
             python -m cryptopulse.cli ingest-news \
               --source gdelt \
               --timespan 1d \
-              --max-records 50
+              --max-records 100
           fi
 
       - name: Ingest summary-enriched publisher RSS
@@ -65,7 +72,7 @@ jobs:
           fi
 
       - name: Classify unseen news
-        run: python -m cryptopulse.cli classify-news --provider openai --limit 50
+        run: python -m cryptopulse.cli classify-news --provider openai --limit 100
 
       - name: Export safe public snapshot
         run: >-

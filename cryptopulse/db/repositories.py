@@ -339,8 +339,8 @@ def list_articles_for_classification(
     limit: int,
 ) -> list[ArticleForClassification]:
     """Return newest articles not yet successfully processed by this version."""
-    if not 1 <= limit <= 100:
-        raise ValueError("Classification limit must be between 1 and 100")
+    if not 1 <= limit <= 200:
+        raise ValueError("Classification limit must be between 1 and 200")
 
     rows = connection.execute(
         """

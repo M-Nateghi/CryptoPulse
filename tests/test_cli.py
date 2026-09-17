@@ -1,10 +1,19 @@
+import argparse
 from datetime import UTC, datetime
+
+import pytest
 
 from cryptopulse import cli
 from cryptopulse.db.database import open_database
 from cryptopulse.db.models import Article, InsertSummary
 from cryptopulse.db.repositories import insert_articles
 from cryptopulse.db.schema import create_schema
+
+
+def test_classification_limit_accepts_200_and_rejects_larger_batches():
+    assert cli._classification_limit("200") == 200
+    with pytest.raises(argparse.ArgumentTypeError, match="between 1 and 200"):
+        cli._classification_limit("201")
 
 
 def test_market_command_runs_ingestion_with_temporary_database(monkeypatch, tmp_path):

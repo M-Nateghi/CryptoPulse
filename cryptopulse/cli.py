@@ -42,8 +42,8 @@ def _classification_limit(value: str) -> int:
         limit = int(value)
     except ValueError as error:
         raise argparse.ArgumentTypeError("limit must be an integer") from error
-    if not 1 <= limit <= 100:
-        raise argparse.ArgumentTypeError("limit must be between 1 and 100")
+    if not 1 <= limit <= 200:
+        raise argparse.ArgumentTypeError("limit must be between 1 and 200")
     return limit
 
 
@@ -147,7 +147,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--limit",
         type=_classification_limit,
         default=10,
-        help="Maximum articles to process (1-100, default: 10).",
+        help="Maximum articles to process (1-200, default: 10).",
     )
     evaluation_parser = commands.add_parser(
         "prepare-evaluation",
